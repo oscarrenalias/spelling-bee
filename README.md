@@ -1,47 +1,98 @@
-# Spelling Bee (Browser-only)
+# Spelling Bee (Browser-Only)
 
 Standalone NYT-style Spelling Bee clone built with plain JavaScript and HTML5.
 
-## Current Features
+Status: MVP complete and ready for public sharing.
 
-- Browser-only runtime (no backend dependencies)
-- Local persistence with IndexedDB
-- Multiple sessions in parallel
-- Daily puzzle + random puzzle sessions
-- NYT-style validation/scoring/rank progression model
+## Features
+
+- Browser-only runtime with no backend
+- IndexedDB persistence (multiple concurrent sessions)
+- Daily puzzle + reproducible random puzzle by seed
+- NYT-style validation, scoring, and rank progression
 - Toggleable hints:
   - Remaining total points
-  - Remaining word count by 2-letter prefix (e.g., `CA`, `CO`)
+  - Remaining word count by 2-letter prefix
+- Keyboard-friendly gameplay:
+  - Global typing capture
+  - Enter to submit
+  - Backspace to delete
+  - Shuffle outer letters
 
-## Architecture and Product Spec
+## Tech Stack
 
-- MVP spec: `docs/spec-mvp.md`
+- Runtime: vanilla JS (ES modules), HTML, CSS
+- Storage: IndexedDB
+- Data: local JSON assets generated from project-controlled raw sources
+- Tooling: Node.js scripts only (no framework build system)
 
-## Quick Start
+## Requirements
 
-Run a single dev command:
+Development dependencies:
+
+- Node.js 20+ (Node 18 may work, but 20+ is recommended)
+- npm
+
+Optional (only if you run `npm run prepare:sources`):
+
+- `git`
+- `make`
+- Python 3 (for local `wordfreq` generation)
+
+## Quick Start (Development)
 
 ```bash
+npm install
 npm run dev
 ```
 
-Then visit:
-
-- `http://localhost:8080`
+Open: [http://127.0.0.1:8080](http://127.0.0.1:8080)
 
 `npm run dev` will:
 
-- run the data pipeline (dictionary + puzzles)
-- run code syntax checks
-- start an embedded static server
-- watch for changes in `src/`, `data/raw/`, `tools/`, and `index.html`
-- rerun the build pipeline automatically on changes
+- build dictionary + puzzles
+- run syntax checks
+- start a local static server
+- watch `src/`, `data/raw/`, `tools/`, and `index.html`
+- rerun build pipeline automatically when files change
+
+### Optional Dev Environment Variables
+
+```bash
+PORT=4173 HOST=127.0.0.1 PUZZLE_COUNT=30 npm run dev
+```
+
+## Build and Run (Production-Like)
+
+1. Generate app data and run code checks:
+
+```bash
+npm install
+npm run build
+```
+
+2. Serve the repository as static files (any static server works). Example:
+
+```bash
+npx serve .
+```
+
+Then open the URL printed by the server.
 
 ## Test
 
 ```bash
 npm test
 ```
+
+## Repository Layout
+
+- `index.html`: app entry
+- `src/`: gameplay logic, UI, storage modules
+- `data/`: generated dictionary/puzzle artifacts + raw sources
+- `tools/`: Node scripts for build/dev/data preparation
+- `tests/`: unit and integration tests
+- `docs/`: MVP scope/spec documentation
 
 ## Data Pipeline
 
@@ -52,8 +103,8 @@ Raw inputs:
 - `data/raw/blocklist.txt`
 - `data/raw/policy.json`
 - optional external sources in `data/raw/sources/`:
-  - `scowl.txt` (base word list)
-  - `wordfreq.tsv` (columns: `word`, `zipf`)
+  - `scowl.txt`
+  - `wordfreq.tsv` (`word`, `zipf`)
 
 Build outputs:
 
@@ -70,15 +121,18 @@ npm run build:puzzles
 npm run build:data
 ```
 
-To prioritize common words:
+If tuning frequency filtering, edit `data/raw/policy.json` and rebuild:
 
-1. Run `npm run prepare:sources`.
-2. Tune `data/raw/policy.json`:
-   - `frequency.minZipf` (higher = more common words only)
-   - `frequency.requireScore` (`true` drops words missing a frequency score)
-3. Run `npm run build:data`.
+- `frequency.minZipf`
+- `frequency.requireScore`
+
+## Documentation
+
+- MVP scope: `docs/scope-mvp.md`
+- Full MVP spec: `docs/spec-mvp.md`
 
 ## Notes
 
-- Dictionary is intentionally strict and project-controlled.
-- Exact NYT lexical parity is not guaranteed because NYT's full proprietary word list is not public.
+- The dictionary is intentionally strict and project-controlled.
+- Exact lexical parity with NYT is not guaranteed (their full proprietary list is not public).
+- Daily puzzle lookup uses the browser date in ISO form and falls back to the first puzzle in `data/puzzles-v1.json` if no date match exists.

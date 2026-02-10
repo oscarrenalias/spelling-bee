@@ -1,76 +1,74 @@
 # Spelling Bee MVP Specification
 
+Last updated: 2026-02-10
+
 ## 1. Objective
 
 Build a standalone, browser-only Spelling Bee game with NYT-like behavior:
 
-- No backend dependencies.
-- Strict local dictionary policy.
-- Daily and random puzzles.
-- Score/rank progression similar to NYT.
-- Toggleable hints panel:
-  - Remaining total points
-  - Remaining word count by 2-letter prefix
-- Multiple parallel game sessions with persistence.
+- No backend dependencies
+- Strict local dictionary policy
+- Daily and random puzzle play
+- NYT-style validation, scoring, and rank progression
+- Toggleable hints panel
+- Multiple parallel sessions with persistence
 
 ## 2. Non-Goals (MVP)
 
-- User accounts or cloud sync.
-- Multiplayer.
-- Server-side APIs.
-- 100% guaranteed lexical parity with NYT proprietary word list.
+- User accounts or cloud sync
+- Multiplayer
+- Server-side APIs
+- Guaranteed 1:1 lexical parity with NYT proprietary word list
 
 ## 3. Product Decisions (Locked)
 
-- Parity target: behavior parity with NYT (validation/scoring/ranks/hints UX style).
-- Dictionary policy: strict.
-- Hints: toggleable (show/hide).
-- Storage: IndexedDB for game data.
-- Runtime model: static browser app (offline-capable, no backend).
+- Runtime: static browser app (no backend)
+- Storage: IndexedDB
+- Hints: user-toggleable show/hide
+- Dictionary policy: strict and project-controlled
+- Puzzle sources: local generated puzzle pack + seeded random session selection
 
 ## 4. Technical Architecture
 
-## 4.1 Runtime and UI
+### 4.1 Runtime and UI
 
-- Language: JavaScript (ES Modules).
-- UI approach: Web Components + plain CSS.
-- Delivery: static assets (HTML/CSS/JS + local JSON data files).
-- Optional dev-only local server/tooling is allowed, but runtime remains browser-only.
+- Language: JavaScript (ES modules)
+- UI: custom elements + plain CSS
+- Delivery: static assets (`index.html`, `src/`, `data/`)
+- Dev-only tooling: Node scripts for build/watch/serve
 
-## 4.2 Core Modules
+### 4.2 Core Modules
 
 - `GameEngine`
-  - Accepts puzzle + input word.
-  - Applies validator/scoring/ranking/hint updates.
-  - Returns deterministic state transitions.
+  - Creates initial session state and applies submissions
+  - Produces deterministic state transitions
 - `Validator`
-  - Checks letter set and center-letter rule.
-  - Enforces min length and duplicate submission rules.
+  - Enforces min length, alpha-only, center-letter rule, allowed-letter set, duplicate check
 - `Scoring`
-  - Computes per-word points and pangram bonus.
+  - Base score + pangram bonus
 - `Ranking`
-  - Computes level from score thresholds.
+  - Maps score to rank thresholds
 - `HintService`
-  - Computes remaining total points.
-  - Computes counts by first two letters from remaining words.
+  - Computes remaining score potential and prefix buckets for unfound words
 - `PuzzleProvider`
-  - Daily puzzle lookup by date.
-  - Random puzzle generation with seed and quality constraints.
+  - Loads local puzzles and resolves daily puzzle by ISO date
+- `RandomGenerator`
+  - Deterministic puzzle selection from seed
 - `StorageRepository`
-  - IndexedDB access and schema migrations.
+  - IndexedDB persistence and session retrieval
 
-## 4.3 Data Flow
+### 4.3 Runtime Flow
 
-1. App initializes puzzle source (dictionary metadata is produced by pipeline, not loaded at runtime).
-2. User opens/resumes/creates a session.
-3. Input word submitted.
-4. `GameEngine` validates and scores.
-5. State persisted to IndexedDB.
-6. UI re-renders score/rank/found words/hints.
+1. Load puzzle pack from `data/puzzles-v1.json`
+2. Restore the most recently updated session from IndexedDB if available
+3. Otherwise start a daily session
+4. On submit, validate and score via `GameEngine`
+5. Persist session state to IndexedDB
+6. Re-render score/rank/found words/hints/session list
 
 ## 5. Data Contracts
 
-## 5.1 Puzzle
+### 5.1 Puzzle
 
 ```json
 {
@@ -97,7 +95,7 @@ Build a standalone, browser-only Spelling Bee game with NYT-like behavior:
 }
 ```
 
-## 5.2 Game Session
+### 5.2 Session Record
 
 ```json
 {
@@ -117,25 +115,22 @@ Build a standalone, browser-only Spelling Bee game with NYT-like behavior:
 }
 ```
 
-## 5.3 Hints View Model
+### 5.3 Hints View Model
 
 ```json
 {
   "remainingTotalPoints": 123,
   "remainingWordCount": 45,
-  "byPrefix2": {
-    "ca": 4,
-    "co": 7
-  }
+  "byPrefix2": [["ca", 4], ["co", 7]]
 }
 ```
 
 ## 6. IndexedDB Design
 
-- Database name: `spelling_bee_db`
-- Current version: `2`
+- Database: `spelling_bee_db`
+- Current schema version: `2`
 
-Object stores:
+Stores:
 
 - `sessions` (key: `sessionId`)
   - indexes: `byUpdatedAt`, `byStatus`, `byPuzzleId`
@@ -144,152 +139,98 @@ Object stores:
 
 Migration policy:
 
-- Bump DB version for schema changes.
-- Keep migration functions deterministic and tested.
-- Preserve existing session data across versions.
+- Deterministic, ordered migration steps
+- Existing session data must survive version upgrades
 
 ## 7. Dictionary and Puzzle Pipeline
 
-## 7.1 Inputs
+### 7.1 Inputs
 
 - `data/raw/dictionary-base.txt`
 - `data/raw/allowlist.txt`
 - `data/raw/blocklist.txt`
 - `data/raw/policy.json`
+- optional source files in `data/raw/sources/` (`scowl.txt`, `wordfreq.tsv`)
 
-## 7.2 Strict Dictionary Rules
+### 7.2 Dictionary Rules
 
 Include:
 
 - lowercase alphabetic words only (`a-z`)
-- length >= 4
-- common modern English words
+- minimum length from policy (default `>= 4`)
+- words passing optional frequency gate
 
-Exclude:
+Exclude (policy-driven):
 
 - profanity/swear words
-- proper nouns
-- countries/cities/regions
-- nationalities/demonyms
-- acronyms/abbreviations
-- hyphenated or apostrophe-containing words
-- obscure/archaic specialist words (unless allowlisted)
+- geo terms and demonyms
+- blocked pattern matches (acronyms/abbreviations-like)
+- configured rare-term list
 
 Override order:
 
-1. Apply filters.
-2. Add `allowlist`.
-3. Remove `blocklist` (final authority).
+1. Apply policy filters
+2. Add `allowlist`
+3. Remove `blocklist` (final authority)
 
-## 7.3 Outputs
+### 7.3 Outputs
 
 - `data/dictionary-v1.json`
 - `data/dictionary-v1-meta.json`
 - `data/puzzles-v1.json`
 
-All puzzle files must reference `dictionaryVersion` to keep behavior deterministic.
-
 ## 8. Puzzle Strategy
 
-- Daily mode:
-  - Local curated puzzle pack keyed by date.
-  - No runtime fetch from third-party sources.
-- Random mode:
-  - Seeded generator to ensure replayability.
-  - Quality gates:
-    - minimum valid word count
-    - minimum one pangram
-    - reasonable score distribution
+- Daily mode: select puzzle by current ISO date (`YYYY-MM-DD`) from local pack
+- Fallback: first puzzle in pack when date is missing
+- Random mode: deterministic puzzle selection from user seed
+- Quality gates in puzzle generation:
+  - minimum valid words (`MIN_WORDS`)
+  - at least one pangram (`MIN_PANGRAMS`)
+  - ranked by heuristic quality score
 
 ## 9. UX and Accessibility
 
-- Keyboard-first word entry.
-- Clear feedback for invalid/duplicate/accepted submissions.
-- Toggleable hint panel.
-- Session switcher for multiple active games.
-- Responsive layout (desktop + mobile).
-- Accessible semantics:
-  - labels, focus states, ARIA live region for submission feedback.
+- Keyboard-first submission flow
+- Global key capture for gameplay typing
+- Shuffle outer letters action
+- Toggleable hints panel with ARIA expanded state
+- ARIA live region feedback for submit results
+- Responsive desktop/mobile layout
 
-## 10. Testing Strategy
+## 10. Test Strategy
 
-Unit tests:
+Unit tests cover:
 
-- validator rules
-- scoring logic
-- ranking thresholds
-- hint calculations
+- validator
+- scoring
+- rankings
+- hints
+- random seed determinism
 
-Integration tests:
+Integration tests cover:
 
-- submit flow and state transitions
-- session create/resume/switch
-- IndexedDB persistence and migrations
+- game-engine submit flow/state transitions
+- IndexedDB migrations
+- session create/resume/switch persistence
 
-Fixture/parity tests:
+Current status:
 
-- known puzzle fixtures with expected score/rank/hint outputs
+- All existing tests pass via `npm test`
 
-## 11. MVP Acceptance Criteria
+## 11. MVP Acceptance Criteria Status
 
-1. [x] Runs fully in browser with no backend dependency.
-2. [x] Loads local strict dictionary and daily/random puzzles.
-3. [x] Enforces validation rules:
-   - only puzzle letters
-   - center letter required
-   - minimum length
-   - duplicate handling
-4. [x] Applies NYT-like scoring and rank progression.
-5. [x] Displays hints with toggle:
-   - remaining total points
-   - counts by first two letters from remaining words
-6. [x] Persists multiple game sessions using IndexedDB.
-7. [x] Reloading browser restores in-progress sessions.
-8. [x] Random puzzles are reproducible from seed.
+1. [x] Browser-only with no backend
+2. [x] Local puzzle loading and daily/random sessions
+3. [x] Validation rules enforced (letters, center, min length, duplicates)
+4. [x] NYT-style scoring + rank progression
+5. [x] Toggleable hints (remaining points + prefix counts)
+6. [x] IndexedDB persistence for multiple sessions
+7. [x] Session recovery after reload
+8. [x] Random sessions reproducible from seed
 
-## 12. Implementation Plan (Milestones)
+## 12. Open Follow-Up (Post-MVP)
 
-1. [x] Foundation
-   - App shell, module boundaries, basic state container, test harness.
-2. [x] Core Rules
-   - Validator, scoring, ranking with unit tests.
-3. [x] Storage
-   - IndexedDB schema, repositories, migrations, persistence tests.
-4. [x] Data Pipeline
-   - Dictionary filtering and puzzle build scripts, output versioning.
-5. [x] Gameplay UI
-   - Letter board, input flow, found list, score/rank display.
-6. [x] Hints and Sessions
-   - Toggleable hints + multi-session management UI.
-7. [ ] Hardening
-   - parity fixtures, accessibility pass, visual polish, mobile polish.
-   - Current state: mobile layout is implemented; parity fixtures and explicit accessibility hardening pass are still pending.
-
-## 13. Open Follow-up Items
-
-- Decide whether to add runtime dictionary metadata visibility/checks in app bootstrap.
-- Add dedicated parity fixture tests against curated puzzle expectations.
-- Perform explicit accessibility hardening pass (labels/focus/keyboard flows audit).
-- Decide if hint interactions should be tracked in stats beyond `viewCount`.
-
-## 14. Implementation Status Snapshot (2026-02-10)
-
-Done:
-
-- Browser-only app runtime with no backend.
-- Local puzzle loading (`data/puzzles-v1.json`) with daily + seeded-random session start.
-- Core rule engine: validator, scoring, rank progression, hints.
-- Multi-session persistence in IndexedDB with schema migrations (DB v2).
-- Data pipeline scripts for strict dictionary filtering + puzzle generation.
-- Unit and integration tests for core logic, migrations, seeded selection, and session persistence.
-
-Partially done / needs explicit confirmation:
-
-- Strict dictionary exclusions for proper nouns are policy/source-driven; there is no dedicated proper-noun list/filter stage.
-- Puzzle quality gate includes min words, pangram requirement, and quality scoring heuristic; "reasonable score distribution" is heuristic rather than a strict contract.
-- Accessibility has baseline support (ARIA live feedback, responsive layout), but no explicit full accessibility pass is documented yet.
-
-Not done yet:
-
-- Dedicated parity fixture suite against known external puzzle expectations.
-- Any additional hint usage analytics beyond storing `hintUsage.viewCount` in session records.
+- Add explicit puzzle parity fixture suite against curated expectations
+- Run dedicated full accessibility hardening pass and document outcomes
+- Decide whether hint usage analytics should include more than static `viewCount`
