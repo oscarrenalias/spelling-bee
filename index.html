@@ -9,7 +9,10 @@
   <body>
     <main class="app-shell">
       <header class="topbar">
-        <h1>Spelling Bee</h1>
+        <div class="title-group">
+          <h1>Spelling Bee</h1>
+          <p id="seed-display" class="seed-display"></p>
+        </div>
         <div class="topbar-actions">
           <button id="new-random-game" type="button">New Random Game</button>
           <form id="seed-form" class="seed-form" autocomplete="off">
@@ -41,7 +44,6 @@
             <button id="shuffle-letters" type="button" class="secondary-button board-action-button">Shuffle</button>
           </div>
           <p id="feedback" aria-live="polite" class="feedback"></p>
-          <p id="seed-display" class="seed-display"></p>
 
           <section class="session-panel">
             <h2>Sessions</h2>
