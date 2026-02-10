@@ -12,6 +12,15 @@
         <h1>Spelling Bee</h1>
         <div class="topbar-actions">
           <button id="new-random-game" type="button">New Random Game</button>
+          <form id="seed-form" class="seed-form" autocomplete="off">
+            <input
+              id="seed-input"
+              type="text"
+              placeholder="Enter seed"
+              aria-label="Seed for reproducible random puzzle"
+            />
+            <button type="submit" class="secondary-button">Start From Seed</button>
+          </form>
         </div>
       </header>
 
@@ -30,6 +39,7 @@
             <button type="submit">Submit</button>
           </form>
           <p id="feedback" aria-live="polite" class="feedback"></p>
+          <p id="seed-display" class="seed-display"></p>
 
           <section class="session-panel">
             <h2>Sessions</h2>

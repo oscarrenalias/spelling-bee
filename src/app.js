@@ -12,6 +12,7 @@ const elements = {
   wordForm: document.getElementById("word-form"),
   wordInput: document.getElementById("word-input"),
   feedback: document.getElementById("feedback"),
+  seedDisplay: document.getElementById("seed-display"),
   score: document.getElementById("score"),
   rank: document.getElementById("rank"),
   foundCount: document.getElementById("found-count"),
@@ -22,7 +23,9 @@ const elements = {
   hintsContent: document.getElementById("hints-content"),
   toggleHintsButton: document.getElementById("toggle-hints"),
   sessions: document.getElementById("sessions"),
-  newRandomButton: document.getElementById("new-random-game")
+  newRandomButton: document.getElementById("new-random-game"),
+  seedForm: document.getElementById("seed-form"),
+  seedInput: document.getElementById("seed-input")
 };
 
 const runtime = {
@@ -44,6 +47,7 @@ function render(state) {
   elements.rank.textContent = toRankLabel(state.rankKey);
   elements.foundCount.textContent = String(state.foundWords.length);
   elements.feedback.textContent = state.feedback;
+  elements.seedDisplay.textContent = state.source === "random" && state.seed ? `Seed: ${state.seed}` : "";
 
   elements.foundWords.innerHTML = "";
   for (const word of state.foundWords) {
@@ -124,8 +128,7 @@ async function startDailySession() {
   await activateState(initialState);
 }
 
-async function startRandomSession() {
-  const seed = createSeed();
+async function startRandomSession(seed = createSeed()) {
   const puzzle = pickPuzzleBySeed(runtime.puzzles, seed);
   const initialState = createInitialState(puzzle, {
     source: "random",
@@ -176,6 +179,20 @@ elements.wordForm.addEventListener("submit", async (event) => {
 
 elements.newRandomButton.addEventListener("click", async () => {
   await startRandomSession();
+});
+
+elements.seedForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  const rawSeed = elements.seedInput.value.trim();
+  if (!rawSeed) {
+    elements.feedback.textContent = "Enter a seed to start a reproducible random game.";
+    elements.seedInput.focus();
+    return;
+  }
+
+  await startRandomSession(rawSeed);
+  elements.seedInput.value = "";
 });
 
 elements.toggleHintsButton.addEventListener("click", () => {
