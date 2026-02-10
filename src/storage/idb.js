@@ -1,5 +1,52 @@
 const DB_NAME = "spelling_bee_db";
-const DB_VERSION = 1;
+const DB_VERSION = 2;
+
+function createSessionsStore(db) {
+  const store = db.createObjectStore("sessions", { keyPath: "sessionId" });
+  store.createIndex("byUpdatedAt", "updatedAt");
+  store.createIndex("byStatus", "status");
+  store.createIndex("byPuzzleId", "puzzleId");
+}
+
+function createPuzzlesStore(db) {
+  db.createObjectStore("puzzles", { keyPath: "id" });
+}
+
+function createAppMetaStore(db) {
+  db.createObjectStore("app_meta", { keyPath: "key" });
+}
+
+// Ordered, deterministic migration steps keyed by target version.
+const MIGRATIONS = [
+  {
+    version: 1,
+    run(db) {
+      if (!db.objectStoreNames.contains("sessions")) {
+        createSessionsStore(db);
+      }
+    }
+  },
+  {
+    version: 2,
+    run(db) {
+      if (!db.objectStoreNames.contains("puzzles")) {
+        createPuzzlesStore(db);
+      }
+
+      if (!db.objectStoreNames.contains("app_meta")) {
+        createAppMetaStore(db);
+      }
+    }
+  }
+];
+
+export function runMigrations(db, oldVersion) {
+  for (const migration of MIGRATIONS) {
+    if (oldVersion < migration.version) {
+      migration.run(db);
+    }
+  }
+}
 
 export function openDb() {
   return new Promise((resolve, reject) => {
@@ -7,13 +54,7 @@ export function openDb() {
 
     request.onupgradeneeded = () => {
       const db = request.result;
-
-      if (!db.objectStoreNames.contains("sessions")) {
-        const store = db.createObjectStore("sessions", { keyPath: "sessionId" });
-        store.createIndex("byUpdatedAt", "updatedAt");
-        store.createIndex("byStatus", "status");
-        store.createIndex("byPuzzleId", "puzzleId");
-      }
+      runMigrations(db, request.oldVersion);
     };
 
     request.onsuccess = () => resolve(request.result);
