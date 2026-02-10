@@ -5,7 +5,7 @@ import { openDb } from "../src/storage/idb.js";
 import { loadSessionById, loadSessions, saveSession } from "../src/storage/repositories.js";
 import { createFakeIndexedDb } from "./helpers/fake-indexeddb.js";
 
-const DB_NAME = "spelling_bee_db";
+const DB_NAME = "renalias_spelling_bee_webapp_db";
 
 const puzzleA = decoratePuzzle({
   id: "2026-02-10",

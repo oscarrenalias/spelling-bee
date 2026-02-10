@@ -1,4 +1,4 @@
-const DB_NAME = "spelling_bee_db";
+const DB_NAME = "renalias_spelling_bee_webapp_db";
 const DB_VERSION = 2;
 
 function createSessionsStore(db) {
