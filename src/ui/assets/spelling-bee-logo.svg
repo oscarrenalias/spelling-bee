@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 72" role="img" aria-labelledby="title desc">
+  <title id="title">Spelling Bee bee icon</title>
+  <desc id="desc">Stylized bee with wings and reading glasses inside a hexagon</desc>
+  <defs>
+    <linearGradient id="beeBody" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ffd54d" />
+      <stop offset="100%" stop-color="#f6b91a" />
+    </linearGradient>
+  </defs>
+
+  <g transform="translate(6 4)">
+    <polygon points="30,0 56,15 56,45 30,60 4,45 4,15" fill="#f6c11f" stroke="#7a5c00" stroke-width="2" />
+
+    <ellipse cx="21" cy="27" rx="8" ry="6" fill="#eef5ff" stroke="#7c8898" stroke-width="1.5" transform="rotate(-23 21 27)" />
+    <ellipse cx="39" cy="27" rx="8" ry="6" fill="#eef5ff" stroke="#7c8898" stroke-width="1.5" transform="rotate(23 39 27)" />
+
+    <ellipse cx="30" cy="35" rx="11.5" ry="15" fill="url(#beeBody)" stroke="#1f1a12" stroke-width="2" />
+    <rect x="20.5" y="29" width="19" height="3.5" rx="1.75" fill="#1f1a12" />
+    <rect x="20.5" y="36" width="19" height="3.5" rx="1.75" fill="#1f1a12" />
+    <rect x="20.5" y="43" width="19" height="3.5" rx="1.75" fill="#1f1a12" />
+
+    <circle cx="30" cy="21" r="6.5" fill="#f7bf32" stroke="#1f1a12" stroke-width="2" />
+    <circle cx="27.5" cy="21" r="2.25" fill="none" stroke="#1f1a12" stroke-width="1.6" />
+    <circle cx="32.5" cy="21" r="2.25" fill="none" stroke="#1f1a12" stroke-width="1.6" />
+    <line x1="29.75" y1="21" x2="30.25" y2="21" stroke="#1f1a12" stroke-width="1.4" />
+    <line x1="25.25" y1="21" x2="24.1" y2="20.2" stroke="#1f1a12" stroke-width="1.4" stroke-linecap="round" />
+    <line x1="34.75" y1="21" x2="35.9" y2="20.2" stroke="#1f1a12" stroke-width="1.4" stroke-linecap="round" />
+  </g>
+</svg>
