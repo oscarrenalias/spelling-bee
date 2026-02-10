@@ -44,7 +44,8 @@ const runtime = {
   hintsVisible: true,
   boardOuterLetters: null,
   boardPuzzleId: null,
-  feedbackTimeoutId: null
+  feedbackTimeoutId: null,
+  rankTrackSnapshot: null
 };
 
 const SUCCESS_FEEDBACK_TIMEOUT_MS = 2600;
@@ -62,6 +63,9 @@ function renderRankTrack(state) {
   const currentRankIndex = orderedRanks.findIndex((rank) => rank.rankKey === state.rankKey);
   const nextRank = orderedRanks.find((rank) => rank.threshold > state.score);
   const currentRank = orderedRanks[currentRankIndex] ?? orderedRanks[0];
+  const previousCurrentMarker = elements.rankTrack.querySelector(".rank-marker.is-current");
+  const previousCurrentRect = previousCurrentMarker?.getBoundingClientRect();
+  const previousSnapshot = runtime.rankTrackSnapshot;
 
   elements.rank.textContent = toRankLabel(state.rankKey);
 
@@ -108,6 +112,40 @@ function renderRankTrack(state) {
     item.append(marker);
     elements.rankTrack.append(item);
   }
+
+  const canAnimateRankJump =
+    Boolean(previousCurrentRect) &&
+    Boolean(previousSnapshot) &&
+    previousSnapshot.puzzleId === state.puzzle.id &&
+    state.score > previousSnapshot.score &&
+    previousSnapshot.rankIndex >= 0 &&
+    currentRankIndex > previousSnapshot.rankIndex &&
+    !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  if (canAnimateRankJump) {
+    const currentMarker = elements.rankTrack.querySelector(".rank-marker.is-current");
+    const currentRect = currentMarker?.getBoundingClientRect();
+
+    if (currentMarker && currentRect) {
+      const deltaX = previousCurrentRect.left + previousCurrentRect.width / 2 - (currentRect.left + currentRect.width / 2);
+      const deltaY = previousCurrentRect.top + previousCurrentRect.height / 2 - (currentRect.top + currentRect.height / 2);
+
+      currentMarker.style.transition = "none";
+      currentMarker.style.transform = `translate(${deltaX}px, calc(${deltaY}px + var(--rank-current-lift, -0.05rem)))`;
+
+      requestAnimationFrame(() => {
+        currentMarker.style.transition =
+          "transform 320ms cubic-bezier(0.22, 1, 0.36, 1), width 180ms ease, height 180ms ease, background 180ms ease";
+        currentMarker.style.transform = "translate(0, var(--rank-current-lift, -0.05rem))";
+      });
+    }
+  }
+
+  runtime.rankTrackSnapshot = {
+    puzzleId: state.puzzle.id,
+    rankIndex: currentRankIndex,
+    score: state.score
+  };
 }
 
 function renderInitLoading(message) {
