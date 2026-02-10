@@ -110,6 +110,12 @@ function renderRankTrack(state) {
     }
 
     item.append(marker);
+    if (rank.rankKey !== state.rankKey) {
+      const thresholdLabel = document.createElement("span");
+      thresholdLabel.className = "rank-threshold-label";
+      thresholdLabel.textContent = String(rank.threshold);
+      item.append(thresholdLabel);
+    }
     elements.rankTrack.append(item);
   }
 

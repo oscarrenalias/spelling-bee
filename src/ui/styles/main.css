@@ -228,7 +228,7 @@ button {
 .rank-track {
   list-style: none;
   margin: 1.4rem 0 0;
-  padding: 0 0.2rem;
+  padding: 0 0.2rem 1.2rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -296,6 +296,17 @@ button {
   transform: translateX(-50%);
   font-size: 0.92rem;
   font-weight: 700;
+  white-space: nowrap;
+}
+
+.rank-threshold-label {
+  position: absolute;
+  top: calc(100% + 0.2rem);
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.68rem;
+  line-height: 1;
+  color: color-mix(in srgb, var(--muted) 72%, #666666 28%);
   white-space: nowrap;
 }
 
