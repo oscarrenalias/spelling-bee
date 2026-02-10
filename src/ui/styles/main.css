@@ -227,7 +227,7 @@ button {
 
 .rank-track {
   list-style: none;
-  margin: 0;
+  margin: 1.4rem 0 0;
   padding: 0 0.2rem;
   display: flex;
   align-items: center;
@@ -483,6 +483,7 @@ td {
 
   .rank-track {
     gap: 0.35rem;
+    margin-top: 1.1rem;
     padding: 0;
   }
 
