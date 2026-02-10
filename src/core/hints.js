@@ -6,15 +6,19 @@ export function computeHints(puzzle, foundWordSet) {
   let remainingWordCount = 0;
 
   for (const word of puzzle.validWords) {
+    const prefix = word.slice(0, 2);
+    const existing = byPrefix2.get(prefix) ?? { found: 0, total: 0 };
+    existing.total += 1;
+
     if (foundWordSet.has(word)) {
+      existing.found += 1;
+      byPrefix2.set(prefix, existing);
       continue;
     }
 
     remainingWordCount += 1;
     remainingTotalPoints += computeWordScore(word, puzzle.pangramSet.has(word));
-
-    const prefix = word.slice(0, 2);
-    byPrefix2.set(prefix, (byPrefix2.get(prefix) ?? 0) + 1);
+    byPrefix2.set(prefix, existing);
   }
 
   const sortedPrefixes = [...byPrefix2.entries()].sort((a, b) => a[0].localeCompare(b[0]));

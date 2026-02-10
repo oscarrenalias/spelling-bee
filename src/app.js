@@ -196,13 +196,13 @@ function render(state) {
   elements.remainingCount.textContent = String(state.hints.remainingWordCount);
 
   elements.hintPrefixes.innerHTML = "";
-  for (const [prefix, count] of state.hints.byPrefix2) {
+  for (const [prefix, progress] of state.hints.byPrefix2) {
     const row = document.createElement("tr");
     const prefixCell = document.createElement("td");
-    const countCell = document.createElement("td");
+    const progressCell = document.createElement("td");
     prefixCell.textContent = prefix.toUpperCase();
-    countCell.textContent = String(count);
-    row.append(prefixCell, countCell);
+    progressCell.textContent = `${progress.found} / ${progress.total}`;
+    row.append(prefixCell, progressCell);
     elements.hintPrefixes.append(row);
   }
 }

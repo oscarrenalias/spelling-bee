@@ -10,7 +10,7 @@ Standalone NYT-style Spelling Bee clone built with plain JavaScript and HTML5. V
 - NYT-style validation, scoring, and rank progression
 - Toggleable hints:
   - Remaining total points
-  - Remaining word count by 2-letter prefix
+  - Per-prefix progress by 2-letter prefix (`found / total`)
 - Keyboard-friendly gameplay:
   - Global typing capture
   - Enter to submit
