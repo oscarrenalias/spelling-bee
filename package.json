@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "prepare:sources": "node tools/prepare-sources.mjs",
     "build:dictionary": "node tools/build-dictionary.mjs",
     "build:puzzles": "node tools/build-puzzles.mjs",
     "build:data": "npm run build:dictionary && npm run build:puzzles -- --count=14",

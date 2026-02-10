@@ -1,5 +1,26 @@
 {
-  "version": "v1",
+  "version": "v2",
+  "sourceVersion": "scowl+wordfreq",
+  "sourceWordLists": [
+    {
+      "path": "data/raw/sources/scowl.txt",
+      "optional": true
+    },
+    {
+      "path": "data/raw/dictionary-base.txt",
+      "optional": false
+    }
+  ],
+  "frequency": {
+    "enabled": true,
+    "path": "data/raw/sources/wordfreq.tsv",
+    "format": "tsv",
+    "wordColumn": "word",
+    "zipfColumn": "zipf",
+    "minZipf": 3.8,
+    "requireScore": false,
+    "optional": true
+  },
   "minimumLength": 4,
   "excludeProfanity": true,
   "excludeGeoTerms": true,

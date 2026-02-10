@@ -1,0 +1,4 @@
+data/raw/sources/.cache/
+data/raw/sources/.venv-wordfreq/
+data/raw/sources/scowl.txt
+data/raw/sources/wordfreq.tsv

@@ -51,6 +51,9 @@ Raw inputs:
 - `data/raw/allowlist.txt`
 - `data/raw/blocklist.txt`
 - `data/raw/policy.json`
+- optional external sources in `data/raw/sources/`:
+  - `scowl.txt` (base word list)
+  - `wordfreq.tsv` (columns: `word`, `zipf`)
 
 Build outputs:
 
@@ -61,10 +64,19 @@ Build outputs:
 Commands:
 
 ```bash
+npm run prepare:sources
 npm run build:dictionary
 npm run build:puzzles
 npm run build:data
 ```
+
+To prioritize common words:
+
+1. Run `npm run prepare:sources`.
+2. Tune `data/raw/policy.json`:
+   - `frequency.minZipf` (higher = more common words only)
+   - `frequency.requireScore` (`true` drops words missing a frequency score)
+3. Run `npm run build:data`.
 
 ## Notes
 

@@ -1,19 +1,35 @@
 {
-  "sourceName": "project-local-seed",
-  "sourceVersion": "v1",
-  "license": "project-internal",
-  "policyVersion": "v1",
+  "sourceName": "scowl+wordfreq+project-policy",
+  "sourceVersion": "scowl+wordfreq",
+  "license": "mixed-open-sources",
+  "policyVersion": "v2",
+  "sourceFilesUsed": [
+    "data/raw/sources/scowl.txt",
+    "data/raw/dictionary-base.txt"
+  ],
+  "sourceWordCounts": {
+    "data/raw/sources/scowl.txt": 105835,
+    "data/raw/dictionary-base.txt": 65
+  },
+  "frequency": {
+    "enabled": true,
+    "file": "data/raw/sources/wordfreq.tsv",
+    "minZipf": 3.8,
+    "rowsLoaded": 105835
+  },
   "counts": {
-    "inputTotal": 65,
-    "normalizedTotal": 65,
+    "inputTotal": 105900,
+    "normalizedTotal": 105842,
+    "removedByFrequency": 76577,
+    "removedMissingFrequency": 0,
     "removedProfanity": 4,
     "removedProperNouns": 0,
-    "removedGeoTerms": 3,
-    "removedDemonyms": 5,
-    "removedAbbreviations": 0,
+    "removedGeoTerms": 4,
+    "removedDemonyms": 4,
+    "removedAbbreviations": 20498,
     "removedRare": 3,
     "allowlistAdded": 0,
     "blocklistRemoved": 1,
-    "finalTotal": 49
+    "finalTotal": 8751
   }
 }

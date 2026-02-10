@@ -61,7 +61,7 @@ Build a standalone, browser-only Spelling Bee game with NYT-like behavior:
 
 ## 4.3 Data Flow
 
-1. App initializes dictionary metadata and puzzle source.
+1. App initializes puzzle source (dictionary metadata is produced by pipeline, not loaded at runtime).
 2. User opens/resumes/creates a session.
 3. Input word submitted.
 4. `GameEngine` validates and scores.
@@ -133,7 +133,7 @@ Build a standalone, browser-only Spelling Bee game with NYT-like behavior:
 ## 6. IndexedDB Design
 
 - Database name: `spelling_bee_db`
-- Initial version: `1`
+- Current version: `2`
 
 Object stores:
 
@@ -232,40 +232,64 @@ Fixture/parity tests:
 
 ## 11. MVP Acceptance Criteria
 
-1. Runs fully in browser with no backend dependency.
-2. Loads local strict dictionary and daily/random puzzles.
-3. Enforces validation rules:
+1. [x] Runs fully in browser with no backend dependency.
+2. [x] Loads local strict dictionary and daily/random puzzles.
+3. [x] Enforces validation rules:
    - only puzzle letters
    - center letter required
    - minimum length
    - duplicate handling
-4. Applies NYT-like scoring and rank progression.
-5. Displays hints with toggle:
+4. [x] Applies NYT-like scoring and rank progression.
+5. [x] Displays hints with toggle:
    - remaining total points
    - counts by first two letters from remaining words
-6. Persists multiple game sessions using IndexedDB.
-7. Reloading browser restores in-progress sessions.
-8. Random puzzles are reproducible from seed.
+6. [x] Persists multiple game sessions using IndexedDB.
+7. [x] Reloading browser restores in-progress sessions.
+8. [x] Random puzzles are reproducible from seed.
 
 ## 12. Implementation Plan (Milestones)
 
-1. Foundation
+1. [x] Foundation
    - App shell, module boundaries, basic state container, test harness.
-2. Core Rules
+2. [x] Core Rules
    - Validator, scoring, ranking with unit tests.
-3. Storage
+3. [x] Storage
    - IndexedDB schema, repositories, migrations, persistence tests.
-4. Data Pipeline
+4. [x] Data Pipeline
    - Dictionary filtering and puzzle build scripts, output versioning.
-5. Gameplay UI
+5. [x] Gameplay UI
    - Letter board, input flow, found list, score/rank display.
-6. Hints and Sessions
+6. [x] Hints and Sessions
    - Toggleable hints + multi-session management UI.
-7. Hardening
+7. [ ] Hardening
    - parity fixtures, accessibility pass, visual polish, mobile polish.
+   - Current state: mobile layout is implemented; parity fixtures and explicit accessibility hardening pass are still pending.
 
 ## 13. Open Follow-up Items
 
-- Choose initial dictionary source (license-compatible) for `dictionary-base.txt`.
-- Define exact rank thresholds per puzzle and final level naming parity.
+- Decide whether to add runtime dictionary metadata visibility/checks in app bootstrap.
+- Add dedicated parity fixture tests against curated puzzle expectations.
+- Perform explicit accessibility hardening pass (labels/focus/keyboard flows audit).
 - Decide if hint interactions should be tracked in stats beyond `viewCount`.
+
+## 14. Implementation Status Snapshot (2026-02-10)
+
+Done:
+
+- Browser-only app runtime with no backend.
+- Local puzzle loading (`data/puzzles-v1.json`) with daily + seeded-random session start.
+- Core rule engine: validator, scoring, rank progression, hints.
+- Multi-session persistence in IndexedDB with schema migrations (DB v2).
+- Data pipeline scripts for strict dictionary filtering + puzzle generation.
+- Unit and integration tests for core logic, migrations, seeded selection, and session persistence.
+
+Partially done / needs explicit confirmation:
+
+- Strict dictionary exclusions for proper nouns are policy/source-driven; there is no dedicated proper-noun list/filter stage.
+- Puzzle quality gate includes min words, pangram requirement, and quality scoring heuristic; "reasonable score distribution" is heuristic rather than a strict contract.
+- Accessibility has baseline support (ARIA live feedback, responsive layout), but no explicit full accessibility pass is documented yet.
+
+Not done yet:
+
+- Dedicated parity fixture suite against known external puzzle expectations.
+- Any additional hint usage analytics beyond storing `hintUsage.viewCount` in session records.
