@@ -160,7 +160,7 @@ test("openDb repairs broken schema when required stores are missing", { concurre
   });
 
   const db = await openDb();
-  assert.equal(db.version, 2);
+  assert.equal(db.version, 3);
 
   const snapshot = fake.inspectDatabase(DB_NAME);
   assert.deepEqual(snapshot.stores, ["app_meta", "puzzles", "sessions"]);

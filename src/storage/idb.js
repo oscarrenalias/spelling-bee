@@ -17,6 +17,20 @@ function createAppMetaStore(db) {
   db.createObjectStore("app_meta", { keyPath: "key" });
 }
 
+function ensureRequiredStores(db) {
+  if (!db.objectStoreNames.contains("sessions")) {
+    createSessionsStore(db);
+  }
+
+  if (!db.objectStoreNames.contains("puzzles")) {
+    createPuzzlesStore(db);
+  }
+
+  if (!db.objectStoreNames.contains("app_meta")) {
+    createAppMetaStore(db);
+  }
+}
+
 // Ordered, deterministic migration steps keyed by target version.
 const MIGRATIONS = [
   {
@@ -53,23 +67,15 @@ function hasRequiredStores(db) {
   return REQUIRED_STORES.every((name) => db.objectStoreNames.contains(name));
 }
 
-function deleteDatabase(name) {
+function openDbAtVersion(targetVersion, { repairAttempted = false } = {}) {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.deleteDatabase(name);
-    request.onsuccess = () => resolve();
-    request.onerror = () => reject(request.error ?? new Error("Failed to delete IndexedDB"));
-    request.onblocked = () => reject(new Error("IndexedDB delete blocked by open connections"));
-  });
-}
-
-export function openDb({ repairAttempted = false } = {}) {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, DB_VERSION);
+    const request = indexedDB.open(DB_NAME, targetVersion);
 
     request.onupgradeneeded = (event) => {
       const db = request.result;
       const oldVersion = event.oldVersion ?? request.oldVersion ?? 0;
       runMigrations(db, oldVersion);
+      ensureRequiredStores(db);
     };
 
     request.onsuccess = () => {
@@ -86,13 +92,16 @@ export function openDb({ repairAttempted = false } = {}) {
       }
 
       db.close();
-      deleteDatabase(DB_NAME)
-        .then(() => openDb({ repairAttempted: true }))
+      openDbAtVersion(db.version + 1, { repairAttempted: true })
         .then(resolve)
         .catch(reject);
     };
     request.onerror = () => reject(request.error ?? new Error("Failed to open IndexedDB"));
   });
+}
+
+export function openDb(options = {}) {
+  return openDbAtVersion(DB_VERSION, options);
 }
 
 export async function withStore(storeName, mode, callback) {
