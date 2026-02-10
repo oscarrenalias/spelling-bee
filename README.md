@@ -1,8 +1,6 @@
 # Spelling Bee (Browser-Only)
 
-Standalone NYT-style Spelling Bee clone built with plain JavaScript and HTML5.
-
-Status: MVP complete and ready for public sharing.
+Standalone NYT-style Spelling Bee clone built with plain JavaScript and HTML5. Vibe coded with Codex, because I can.
 
 ## Features
 
