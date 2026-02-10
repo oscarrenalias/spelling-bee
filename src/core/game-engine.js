@@ -29,6 +29,7 @@ export function createInitialState(puzzle, existingSession = null) {
     score,
     rankKey,
     feedback: "",
+    feedbackType: "idle",
     hints: computeHints(puzzle, foundWordSet)
   };
 }
@@ -38,7 +39,8 @@ export function submitWord(state, rawWord) {
   if (!result.ok) {
     return {
       ...state,
-      feedback: result.reason
+      feedback: result.reason,
+      feedbackType: "error"
     };
   }
 
@@ -56,7 +58,8 @@ export function submitWord(state, rawWord) {
     foundWordSet: nextFoundSet,
     score: nextScore,
     rankKey: nextRank,
-    feedback: `Accepted +${deltaScore}.${suffix}`.trim(),
+    feedback: `Accepted +${deltaScore}${suffix}`,
+    feedbackType: "success",
     hints: computeHints(state.puzzle, nextFoundSet)
   };
 }

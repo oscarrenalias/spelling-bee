@@ -43,8 +43,11 @@ const runtime = {
   sessionsCache: [],
   hintsVisible: true,
   boardOuterLetters: null,
-  boardPuzzleId: null
+  boardPuzzleId: null,
+  feedbackTimeoutId: null
 };
+
+const SUCCESS_FEEDBACK_TIMEOUT_MS = 2600;
 
 function getOrderedRanks(rankThresholds) {
   return RANK_ORDER.filter((rankKey) => typeof rankThresholds[rankKey] === "number").map((rankKey) => ({
@@ -183,6 +186,31 @@ function render(state) {
   renderRankTrack(state);
   elements.foundCount.textContent = String(state.foundWords.length);
   elements.feedback.textContent = state.feedback;
+  const feedbackType = state.feedbackType ?? "idle";
+  elements.feedback.classList.toggle("is-success", feedbackType === "success");
+  elements.feedback.classList.toggle("is-error", feedbackType === "error");
+  elements.feedback.classList.toggle("is-visible", Boolean(state.feedback));
+
+  if (runtime.feedbackTimeoutId) {
+    clearTimeout(runtime.feedbackTimeoutId);
+    runtime.feedbackTimeoutId = null;
+  }
+
+  if (feedbackType === "success" && state.feedback) {
+    const feedbackText = state.feedback;
+    runtime.feedbackTimeoutId = window.setTimeout(() => {
+      if (!runtime.activeState || runtime.activeState.feedback !== feedbackText) {
+        return;
+      }
+
+      runtime.activeState = {
+        ...runtime.activeState,
+        feedback: "",
+        feedbackType: "idle"
+      };
+      render(runtime.activeState);
+    }, SUCCESS_FEEDBACK_TIMEOUT_MS);
+  }
   elements.seedDisplay.textContent = state.source === "random" && state.seed ? `Seed: ${state.seed}` : "";
 
   elements.foundWords.innerHTML = "";

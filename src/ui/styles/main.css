@@ -352,9 +352,34 @@ input::placeholder {
 }
 
 .feedback {
-  min-height: 1.25rem;
-  font-weight: 600;
+  width: 100%;
+  min-height: 1.7rem;
+  margin: 0 0 0.25rem;
+  text-align: center;
+  font-weight: 700;
+  letter-spacing: 0.01em;
   color: var(--feedback);
+  opacity: 0;
+  transform: translateY(-4px) scale(0.98);
+  transition: opacity 220ms ease, transform 220ms ease, color 180ms ease;
+}
+
+.feedback.is-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.feedback.is-success {
+  color: color-mix(in srgb, #0f9d58 78%, var(--ink) 22%);
+  text-shadow: 0 0 0.55rem color-mix(in srgb, #1abc63 35%, transparent 65%);
+}
+
+.feedback.is-success::before {
+  content: "✓ ";
+}
+
+.feedback.is-error {
+  color: color-mix(in srgb, #d32f2f 86%, var(--ink) 14%);
 }
 
 .seed-display {
