@@ -17,7 +17,7 @@
     "format": "tsv",
     "wordColumn": "word",
     "zipfColumn": "zipf",
-    "minZipf": 3.8,
+    "minZipf": 3.5,
     "requireScore": false,
     "optional": true
   },

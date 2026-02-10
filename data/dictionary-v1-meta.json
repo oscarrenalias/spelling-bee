@@ -14,13 +14,13 @@
   "frequency": {
     "enabled": true,
     "file": "data/raw/sources/wordfreq.tsv",
-    "minZipf": 3.8,
+    "minZipf": 3.5,
     "rowsLoaded": 105835
   },
   "counts": {
     "inputTotal": 105900,
     "normalizedTotal": 105842,
-    "removedByFrequency": 76577,
+    "removedByFrequency": 71817,
     "removedMissingFrequency": 0,
     "removedProfanity": 4,
     "removedProperNouns": 0,
@@ -29,7 +29,7 @@
     "removedAbbreviations": 20498,
     "removedRare": 3,
     "allowlistAdded": 0,
-    "blocklistRemoved": 1,
-    "finalTotal": 8751
+    "blocklistRemoved": 104,
+    "finalTotal": 13408
   }
 }
