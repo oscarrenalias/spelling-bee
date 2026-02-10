@@ -16,6 +16,7 @@
   --muted: #6f6252;
   --input-bg: #ffffff;
   --input-placeholder: #7a6d5b;
+  --input-center-letter: var(--accent);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -36,6 +37,7 @@
     --muted: #adadad;
     --input-bg: #171717;
     --input-placeholder: #9b9b9b;
+    --input-center-letter: var(--accent);
   }
 }
 
@@ -335,18 +337,39 @@ button {
   transform: none;
 }
 
+.word-input-shell {
+  position: relative;
+  display: inline-grid;
+}
+
+.word-input-highlight,
 .word-form input {
+  grid-area: 1 / 1;
   width: 9ch;
   min-width: 0;
   padding: 0.2rem;
-  border: 0;
-  background: transparent;
-  color: var(--ink);
   text-align: center;
   text-transform: uppercase;
-  border-radius: 8px;
   font-size: 2rem;
   font-weight: 700;
+}
+
+.word-input-highlight {
+  pointer-events: none;
+  color: var(--ink);
+}
+
+.word-input-highlight .is-center-letter {
+  color: var(--input-center-letter);
+}
+
+.word-form input {
+  border: 0;
+  background: transparent;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  caret-color: var(--ink);
+  border-radius: 8px;
   outline: none;
 }
 

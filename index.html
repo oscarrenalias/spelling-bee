@@ -63,7 +63,10 @@
           <div class="board-stack">
             <p id="feedback" aria-live="polite" class="feedback"></p>
             <form id="word-form" class="word-form" autocomplete="off">
-              <input id="word-input" type="text" minlength="4" spellcheck="false" required />
+              <div class="word-input-shell">
+                <div id="word-input-highlight" class="word-input-highlight" aria-hidden="true"></div>
+                <input id="word-input" type="text" minlength="4" spellcheck="false" required />
+              </div>
               <button type="submit">Submit</button>
             </form>
             <letter-board id="letter-board"></letter-board>

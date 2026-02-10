@@ -17,6 +17,7 @@ const elements = {
   board: document.getElementById("letter-board"),
   wordForm: document.getElementById("word-form"),
   wordInput: document.getElementById("word-input"),
+  wordInputHighlight: document.getElementById("word-input-highlight"),
   feedback: document.getElementById("feedback"),
   seedDisplay: document.getElementById("seed-display"),
   score: document.getElementById("score"),
@@ -49,6 +50,27 @@ const runtime = {
 };
 
 const SUCCESS_FEEDBACK_TIMEOUT_MS = 2600;
+
+function syncWordInputCenterLetterState() {
+  const state = runtime.activeState;
+  const highlight = elements.wordInputHighlight;
+  highlight.replaceChildren();
+
+  if (!state) {
+    return;
+  }
+
+  const centerLetter = state.puzzle.centerLetter;
+
+  for (const char of elements.wordInput.value) {
+    const fragment = document.createElement("span");
+    fragment.textContent = char;
+    if (char.toLowerCase() === centerLetter) {
+      fragment.classList.add("is-center-letter");
+    }
+    highlight.append(fragment);
+  }
+}
 
 function getOrderedRanks(rankThresholds) {
   return RANK_ORDER.filter((rankKey) => typeof rankThresholds[rankKey] === "number").map((rankKey) => ({
@@ -277,6 +299,8 @@ function render(state) {
     row.append(prefixCell, progressCell);
     elements.hintPrefixes.append(row);
   }
+
+  syncWordInputCenterLetterState();
 }
 
 function renderSessionsList() {
@@ -391,7 +415,12 @@ elements.wordForm.addEventListener("submit", async (event) => {
   render(runtime.activeState);
   await persistAndRefreshSession(runtime.activeState);
   elements.wordInput.value = "";
+  syncWordInputCenterLetterState();
   elements.wordInput.focus();
+});
+
+elements.wordInput.addEventListener("input", () => {
+  syncWordInputCenterLetterState();
 });
 
 elements.newRandomButton.addEventListener("click", async () => {
@@ -460,12 +489,14 @@ document.addEventListener("keydown", (event) => {
   if (LETTER_KEY_PATTERN.test(event.key)) {
     event.preventDefault();
     elements.wordInput.value += event.key.toLowerCase();
+    syncWordInputCenterLetterState();
     return;
   }
 
   if (event.key === "Backspace") {
     event.preventDefault();
     elements.wordInput.value = elements.wordInput.value.slice(0, -1);
+    syncWordInputCenterLetterState();
     return;
   }
 
