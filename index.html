@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Spelling Bee</title>
+    <link rel="stylesheet" href="./src/ui/styles/main.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <h1>Spelling Bee</h1>
+        <div class="topbar-actions">
+          <button id="new-random-game" type="button">New Random Game</button>
+        </div>
+      </header>
+
+      <section class="status-panel">
+        <div><strong>Score:</strong> <span id="score">0</span></div>
+        <div><strong>Rank:</strong> <span id="rank">Beginner</span></div>
+        <div><strong>Words Found:</strong> <span id="found-count">0</span></div>
+      </section>
+
+      <section class="game-layout">
+        <div class="left-panel">
+          <letter-board id="letter-board"></letter-board>
+
+          <form id="word-form" class="word-form" autocomplete="off">
+            <input id="word-input" type="text" minlength="4" spellcheck="false" placeholder="Enter word" required />
+            <button type="submit">Submit</button>
+          </form>
+          <p id="feedback" aria-live="polite" class="feedback"></p>
+
+          <section class="session-panel">
+            <h2>Sessions</h2>
+            <ul id="sessions"></ul>
+          </section>
+        </div>
+
+        <aside class="right-panel">
+          <section class="found-panel">
+            <h2>Found Words</h2>
+            <ul id="found-words"></ul>
+          </section>
+
+          <section class="hints-panel">
+            <div class="panel-header">
+              <h2>Hints</h2>
+              <button id="toggle-hints" type="button" class="secondary-button">Hide Hints</button>
+            </div>
+            <div id="hints-content">
+              <p><strong>Remaining points:</strong> <span id="remaining-points">0</span></p>
+              <p><strong>Remaining words:</strong> <span id="remaining-count">0</span></p>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Prefix</th>
+                    <th>Count</th>
+                  </tr>
+                </thead>
+                <tbody id="hint-prefixes"></tbody>
+              </table>
+            </div>
+          </section>
+        </aside>
+      </section>
+    </main>
+
+    <script type="module" src="./src/app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,416 @@
+{
+  "version": "v1",
+  "generatedAt": "2026-02-10T16:22:31.596Z",
+  "sourceDictionaryVersion": "v1",
+  "puzzles": [
+    {
+      "id": "2026-02-10",
+      "date": "2026-02-10",
+      "centerLetter": "a",
+      "outerLetters": [
+        "c",
+        "e",
+        "l",
+        "n",
+        "r",
+        "t"
+      ],
+      "dictionaryVersion": "v1",
+      "validWords": [
+        "acer",
+        "acne",
+        "acre",
+        "alert",
+        "alter",
+        "arena",
+        "canal",
+        "caner",
+        "cater",
+        "cattle",
+        "central",
+        "clean",
+        "cleaner",
+        "clear",
+        "crane",
+        "crate",
+        "create",
+        "lace",
+        "lane",
+        "late",
+        "later",
+        "learn",
+        "learner",
+        "renal",
+        "rental",
+        "tale",
+        "teal",
+        "tear",
+        "trace"
+      ],
+      "pangrams": [
+        "central"
+      ],
+      "maxScore": 125,
+      "rankThresholds": {
+        "beginner": 0,
+        "goodStart": 2,
+        "movingUp": 6,
+        "good": 10,
+        "solid": 18,
+        "nice": 31,
+        "great": 50,
+        "amazing": 62,
+        "genius": 87,
+        "queenBee": 125
+      }
+    },
+    {
+      "id": "2026-02-11",
+      "date": "2026-02-11",
+      "centerLetter": "e",
+      "outerLetters": [
+        "a",
+        "c",
+        "l",
+        "n",
+        "r",
+        "t"
+      ],
+      "dictionaryVersion": "v1",
+      "validWords": [
+        "acer",
+        "acne",
+        "acre",
+        "alert",
+        "alter",
+        "arena",
+        "caner",
+        "cater",
+        "cattle",
+        "central",
+        "clean",
+        "cleaner",
+        "clear",
+        "crane",
+        "crate",
+        "create",
+        "lace",
+        "lane",
+        "late",
+        "later",
+        "learn",
+        "learner",
+        "renal",
+        "rental",
+        "tale",
+        "teal",
+        "tear",
+        "trace"
+      ],
+      "pangrams": [
+        "central"
+      ],
+      "maxScore": 120,
+      "rankThresholds": {
+        "beginner": 0,
+        "goodStart": 2,
+        "movingUp": 6,
+        "good": 9,
+        "solid": 18,
+        "nice": 30,
+        "great": 48,
+        "amazing": 60,
+        "genius": 84,
+        "queenBee": 120
+      }
+    },
+    {
+      "id": "2026-02-12",
+      "date": "2026-02-12",
+      "centerLetter": "r",
+      "outerLetters": [
+        "a",
+        "c",
+        "e",
+        "l",
+        "n",
+        "t"
+      ],
+      "dictionaryVersion": "v1",
+      "validWords": [
+        "acer",
+        "acre",
+        "alert",
+        "alter",
+        "arena",
+        "caner",
+        "cater",
+        "central",
+        "cleaner",
+        "clear",
+        "crane",
+        "crate",
+        "create",
+        "later",
+        "learn",
+        "learner",
+        "renal",
+        "rental",
+        "tear",
+        "trace"
+      ],
+      "pangrams": [
+        "central"
+      ],
+      "maxScore": 103,
+      "rankThresholds": {
+        "beginner": 0,
+        "goodStart": 2,
+        "movingUp": 5,
+        "good": 8,
+        "solid": 15,
+        "nice": 25,
+        "great": 41,
+        "amazing": 51,
+        "genius": 72,
+        "queenBee": 103
+      }
+    },
+    {
+      "id": "2026-02-13",
+      "date": "2026-02-13",
+      "centerLetter": "l",
+      "outerLetters": [
+        "a",
+        "c",
+        "e",
+        "n",
+        "r",
+        "t"
+      ],
+      "dictionaryVersion": "v1",
+      "validWords": [
+        "alert",
+        "alter",
+        "canal",
+        "cattle",
+        "central",
+        "clean",
+        "cleaner",
+        "clear",
+        "lace",
+        "lane",
+        "late",
+        "later",
+        "learn",
+        "learner",
+        "renal",
+        "rental",
+        "tale",
+        "teal"
+      ],
+      "pangrams": [
+        "central"
+      ],
+      "maxScore": 85,
+      "rankThresholds": {
+        "beginner": 0,
+        "goodStart": 1,
+        "movingUp": 4,
+        "good": 6,
+        "solid": 12,
+        "nice": 21,
+        "great": 34,
+        "amazing": 42,
+        "genius": 59,
+        "queenBee": 85
+      }
+    },
+    {
+      "id": "2026-02-14",
+      "date": "2026-02-14",
+      "centerLetter": "c",
+      "outerLetters": [
+        "a",
+        "e",
+        "l",
+        "n",
+        "r",
+        "t"
+      ],
+      "dictionaryVersion": "v1",
+      "validWords": [
+        "acer",
+        "acne",
+        "acre",
+        "canal",
+        "caner",
+        "cater",
+        "cattle",
+        "central",
+        "clean",
+        "cleaner",
+        "clear",
+        "crane",
+        "crate",
+        "create",
+        "lace",
+        "trace"
+      ],
+      "pangrams": [
+        "central"
+      ],
+      "maxScore": 77,
+      "rankThresholds": {
+        "beginner": 0,
+        "goodStart": 1,
+        "movingUp": 3,
+        "good": 6,
+        "solid": 11,
+        "nice": 19,
+        "great": 30,
+        "amazing": 38,
+        "genius": 53,
+        "queenBee": 77
+      }
+    },
+    {
+      "id": "2026-02-15",
+      "date": "2026-02-15",
+      "centerLetter": "n",
+      "outerLetters": [
+        "a",
+        "c",
+        "e",
+        "l",
+        "r",
+        "t"
+      ],
+      "dictionaryVersion": "v1",
+      "validWords": [
+        "acne",
+        "arena",
+        "canal",
+        "caner",
+        "central",
+        "clean",
+        "cleaner",
+        "crane",
+        "lane",
+        "learn",
+        "learner",
+        "renal",
+        "rental"
+      ],
+      "pangrams": [
+        "central"
+      ],
+      "maxScore": 71,
+      "rankThresholds": {
+        "beginner": 0,
+        "goodStart": 1,
+        "movingUp": 3,
+        "good": 5,
+        "solid": 10,
+        "nice": 17,
+        "great": 28,
+        "amazing": 35,
+        "genius": 49,
+        "queenBee": 71
+      }
+    },
+    {
+      "id": "2026-02-16",
+      "date": "2026-02-16",
+      "centerLetter": "t",
+      "outerLetters": [
+        "a",
+        "c",
+        "e",
+        "l",
+        "n",
+        "r"
+      ],
+      "dictionaryVersion": "v1",
+      "validWords": [
+        "alert",
+        "alter",
+        "cater",
+        "cattle",
+        "central",
+        "crate",
+        "create",
+        "late",
+        "later",
+        "rental",
+        "tale",
+        "teal",
+        "tear",
+        "trace"
+      ],
+      "pangrams": [
+        "central"
+      ],
+      "maxScore": 66,
+      "rankThresholds": {
+        "beginner": 0,
+        "goodStart": 1,
+        "movingUp": 3,
+        "good": 5,
+        "solid": 9,
+        "nice": 16,
+        "great": 26,
+        "amazing": 33,
+        "genius": 46,
+        "queenBee": 66
+      }
+    },
+    {
+      "id": "2026-02-17",
+      "date": "2026-02-17",
+      "centerLetter": "o",
+      "outerLetters": [
+        "b",
+        "e",
+        "l",
+        "m",
+        "p",
+        "r"
+      ],
+      "dictionaryVersion": "v1",
+      "validWords": [
+        "bloom",
+        "boom",
+        "boomer",
+        "bore",
+        "broom",
+        "lobe",
+        "loom",
+        "loop",
+        "mole",
+        "more",
+        "probe",
+        "problem",
+        "proem",
+        "robe",
+        "room"
+      ],
+      "pangrams": [
+        "problem"
+      ],
+      "maxScore": 49,
+      "rankThresholds": {
+        "beginner": 0,
+        "goodStart": 0,
+        "movingUp": 2,
+        "good": 3,
+        "solid": 7,
+        "nice": 12,
+        "great": 19,
+        "amazing": 24,
+        "genius": 34,
+        "queenBee": 49
+      }
+    }
+  ]
+}

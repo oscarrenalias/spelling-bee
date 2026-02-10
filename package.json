@@ -1,0 +1,15 @@
+{
+  "name": "spelling-bee",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build:dictionary": "node tools/build-dictionary.mjs",
+    "build:puzzles": "node tools/build-puzzles.mjs",
+    "build:data": "npm run build:dictionary && npm run build:puzzles -- --count=14",
+    "build:code": "node tools/check-code.mjs",
+    "build": "npm run build:data && npm run build:code",
+    "dev": "node tools/dev.mjs",
+    "test": "node --test"
+  }
+}

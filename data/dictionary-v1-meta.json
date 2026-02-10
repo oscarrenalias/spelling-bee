@@ -1,0 +1,19 @@
+{
+  "sourceName": "project-local-seed",
+  "sourceVersion": "v1",
+  "license": "project-internal",
+  "policyVersion": "v1",
+  "counts": {
+    "inputTotal": 65,
+    "normalizedTotal": 65,
+    "removedProfanity": 4,
+    "removedProperNouns": 0,
+    "removedGeoTerms": 3,
+    "removedDemonyms": 5,
+    "removedAbbreviations": 0,
+    "removedRare": 3,
+    "allowlistAdded": 0,
+    "blocklistRemoved": 1,
+    "finalTotal": 49
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "version": "v1",
+  "minimumLength": 4,
+  "excludeProfanity": true,
+  "excludeGeoTerms": true,
+  "excludeDemonyms": true,
+  "excludeRare": true,
+  "profanity": ["damn", "hell", "shit", "crap"],
+  "geoTerms": ["england", "brazil", "argentina", "chile"],
+  "demonyms": ["american", "mexican", "canadian", "chilean", "french"],
+  "rareTerms": ["anele", "calera", "taler"],
+  "blockedPatterns": ["^[a-z]{1,3}$"]
+}

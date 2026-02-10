@@ -1,0 +1,155 @@
+const template = document.createElement("template");
+template.innerHTML = `
+  <style>
+    :host {
+      display: block;
+      margin-top: 0.5rem;
+    }
+
+    .wrap {
+      max-width: 410px;
+      margin: 0 auto;
+    }
+
+    svg {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    .hex {
+      fill: #dddad4;
+      stroke: #090909;
+      stroke-width: 5;
+      stroke-linejoin: round;
+    }
+
+    .hex.center {
+      fill: #f6dd2f;
+    }
+
+    .letter {
+      fill: #111111;
+      font-size: 44px;
+      font-weight: 800;
+      text-anchor: middle;
+      dominant-baseline: middle;
+      font-family: "Avenir Next", "Segoe UI", sans-serif;
+      text-transform: uppercase;
+      user-select: none;
+    }
+
+    @media (max-width: 560px) {
+      .wrap {
+        max-width: 320px;
+      }
+
+      .letter {
+        font-size: 36px;
+      }
+    }
+  </style>
+  <div class="wrap">
+    <svg viewBox="0 0 380 340" role="img" aria-label="Puzzle letter board">
+      <polygon class="hex" data-hex="0"></polygon>
+      <polygon class="hex" data-hex="1"></polygon>
+      <polygon class="hex" data-hex="2"></polygon>
+      <polygon class="hex" data-hex="3"></polygon>
+      <polygon class="hex" data-hex="4"></polygon>
+      <polygon class="hex" data-hex="5"></polygon>
+      <polygon class="hex center" data-hex="center"></polygon>
+
+      <text class="letter" data-slot="0"></text>
+      <text class="letter" data-slot="1"></text>
+      <text class="letter" data-slot="2"></text>
+      <text class="letter" data-slot="3"></text>
+      <text class="letter" data-slot="4"></text>
+      <text class="letter" data-slot="5"></text>
+      <text class="letter" data-slot="center"></text>
+    </svg>
+  </div>
+`;
+
+function hexPoints(cx, cy, r) {
+  const h = Math.sqrt(3) * r * 0.5;
+  return [
+    [cx - r, cy],
+    [cx - r * 0.5, cy - h],
+    [cx + r * 0.5, cy - h],
+    [cx + r, cy],
+    [cx + r * 0.5, cy + h],
+    [cx - r * 0.5, cy + h]
+  ]
+    .map(([x, y]) => `${x.toFixed(2)},${y.toFixed(2)}`)
+    .join(" ");
+}
+
+class LetterBoard extends HTMLElement {
+  constructor() {
+    super();
+    this.attachShadow({ mode: "open" });
+    this.shadowRoot.append(template.content.cloneNode(true));
+    this.layout = {
+      r: 56,
+      positions: {
+        top: { x: 190, y: 72 },
+        rightTop: { x: 274, y: 121 },
+        rightBottom: { x: 274, y: 219 },
+        bottom: { x: 190, y: 268 },
+        leftBottom: { x: 106, y: 219 },
+        leftTop: { x: 106, y: 121 },
+        center: { x: 190, y: 170 }
+      }
+    };
+
+    this.hexOrder = ["top", "rightTop", "rightBottom", "bottom", "leftBottom", "leftTop"];
+    this.drawHexes();
+    this.positionLabels();
+  }
+
+  drawHexes() {
+    for (let idx = 0; idx < this.hexOrder.length; idx += 1) {
+      const key = this.hexOrder[idx];
+      const center = this.layout.positions[key];
+      const polygon = this.shadowRoot.querySelector(`[data-hex=\"${idx}\"]`);
+      if (polygon) {
+        polygon.setAttribute("points", hexPoints(center.x, center.y, this.layout.r));
+      }
+    }
+
+    const centerPolygon = this.shadowRoot.querySelector('[data-hex="center"]');
+    const centerPoint = this.layout.positions.center;
+    centerPolygon.setAttribute("points", hexPoints(centerPoint.x, centerPoint.y, this.layout.r));
+  }
+
+  positionLabels() {
+    for (let idx = 0; idx < this.hexOrder.length; idx += 1) {
+      const key = this.hexOrder[idx];
+      const pos = this.layout.positions[key];
+      const label = this.shadowRoot.querySelector(`[data-slot=\"${idx}\"]`);
+      if (label) {
+        label.setAttribute("x", String(pos.x));
+        label.setAttribute("y", String(pos.y));
+      }
+    }
+
+    const center = this.layout.positions.center;
+    const centerLabel = this.shadowRoot.querySelector('[data-slot="center"]');
+    centerLabel.setAttribute("x", String(center.x));
+    centerLabel.setAttribute("y", String(center.y));
+  }
+
+  setLetters(centerLetter, outerLetters) {
+    const center = this.shadowRoot.querySelector('[data-slot="center"]');
+    center.textContent = centerLetter;
+
+    outerLetters.forEach((letter, idx) => {
+      const slot = this.shadowRoot.querySelector(`[data-slot="${idx}"]`);
+      if (slot) {
+        slot.textContent = letter;
+      }
+    });
+  }
+}
+
+customElements.define("letter-board", LetterBoard);
