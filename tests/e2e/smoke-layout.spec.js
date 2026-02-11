@@ -145,6 +145,48 @@ test.describe("core ui smoke", () => {
     expect(stickyMetrics.bottomOffset).toBeLessThan(stickyMetrics.viewportHeight * 0.45);
   });
 
+  test("mobile gameplay uses page scroll instead of nested found-words scrolling", async ({ page, isMobile }) => {
+    test.skip(!isMobile, "Mobile-only assertion");
+    await gotoAndWaitForReady(page);
+
+    const foundWordsStyles = await page.evaluate(() => {
+      const list = document.querySelector("#found-words");
+      if (!list) {
+        return null;
+      }
+      const style = window.getComputedStyle(list);
+      return {
+        maxHeight: style.maxHeight,
+        overflowY: style.overflowY
+      };
+    });
+
+    expect(foundWordsStyles).not.toBeNull();
+    expect(foundWordsStyles.maxHeight).toBe("none");
+    expect(foundWordsStyles.overflowY).toBe("visible");
+  });
+
+  test("desktop keeps found-words list internally scrollable", async ({ page, isMobile }) => {
+    test.skip(isMobile, "Desktop-only assertion");
+    await gotoAndWaitForReady(page);
+
+    const foundWordsStyles = await page.evaluate(() => {
+      const list = document.querySelector("#found-words");
+      if (!list) {
+        return null;
+      }
+      const style = window.getComputedStyle(list);
+      return {
+        maxHeight: style.maxHeight,
+        overflowY: style.overflowY
+      };
+    });
+
+    expect(foundWordsStyles).not.toBeNull();
+    expect(foundWordsStyles.maxHeight).not.toBe("none");
+    expect(foundWordsStyles.overflowY).toBe("auto");
+  });
+
   test("desktop keeps inline sessions panel visible", async ({ page, isMobile }) => {
     test.skip(isMobile, "Desktop-only assertion");
     await gotoAndWaitForReady(page);

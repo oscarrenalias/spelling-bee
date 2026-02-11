@@ -664,7 +664,17 @@ td {
   }
 
   .session-panel.is-open-mobile #sessions {
+    max-height: min(55dvh, 520px);
+    overflow: auto;
+  }
+
+  #found-words {
     max-height: none;
+    overflow: visible;
+  }
+
+  .hints-panel {
+    overflow: visible;
   }
 }
 
