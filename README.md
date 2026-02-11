@@ -126,8 +126,7 @@ If tuning frequency filtering, edit `data/raw/policy.json` and rebuild:
 
 ## Documentation
 
-- MVP scope: `docs/scope-mvp.md`
-- Full MVP spec: `docs/spec-mvp.md`
+- Product and technical spec: `docs/spec.md`
 
 ## Notes
 
