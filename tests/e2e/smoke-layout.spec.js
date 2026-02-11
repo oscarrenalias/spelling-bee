@@ -121,6 +121,30 @@ test.describe("core ui smoke", () => {
     expect(rowMetrics.maxDelta).toBeLessThan(10);
   });
 
+  test("mobile board actions stay sticky near the bottom", async ({ page, isMobile }) => {
+    test.skip(!isMobile, "Mobile-only assertion");
+    await gotoAndWaitForReady(page);
+
+    const stickyMetrics = await page.evaluate(() => {
+      const actions = document.querySelector(".board-actions");
+      if (!actions) {
+        return null;
+      }
+
+      const style = window.getComputedStyle(actions);
+      const rect = actions.getBoundingClientRect();
+      return {
+        position: style.position,
+        bottomOffset: window.innerHeight - rect.bottom,
+        viewportHeight: window.innerHeight
+      };
+    });
+
+    expect(stickyMetrics).not.toBeNull();
+    expect(stickyMetrics.position).toBe("sticky");
+    expect(stickyMetrics.bottomOffset).toBeLessThan(stickyMetrics.viewportHeight * 0.45);
+  });
+
   test("desktop keeps inline sessions panel visible", async ({ page, isMobile }) => {
     test.skip(isMobile, "Desktop-only assertion");
     await gotoAndWaitForReady(page);
