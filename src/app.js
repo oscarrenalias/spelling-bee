@@ -4,6 +4,7 @@ import { RANK_ORDER, toRankLabel } from "./core/rankings.js";
 import { getDailyPuzzle, loadPuzzles } from "./puzzles/provider.js";
 import { createSeed, pickPuzzleBySeed } from "./puzzles/random-generator.js";
 import { loadSessionById, loadSessions, saveSession } from "./storage/repositories.js";
+import { normalizeWord } from "./core/validator.js";
 
 const HINTS_VISIBILITY_KEY = "spelling-bee:hints-visible";
 const LETTER_KEY_PATTERN = /^[a-z]$/i;
@@ -54,7 +55,8 @@ const runtime = {
   feedbackTimeoutId: null,
   rankTrackSnapshot: null,
   mobileSessionsOpen: false,
-  mobileSeedControlsOpen: false
+  mobileSeedControlsOpen: false,
+  liveDuplicateWord: null
 };
 
 const SUCCESS_FEEDBACK_TIMEOUT_MS = 2600;
@@ -233,7 +235,7 @@ function appendLetterToWordInput(letter) {
   }
 
   elements.wordInput.value += letter.toLowerCase();
-  syncWordInputCenterLetterState();
+  handleWordInputChanged();
 }
 
 function deleteLastLetterFromWordInput() {
@@ -242,7 +244,7 @@ function deleteLastLetterFromWordInput() {
   }
 
   elements.wordInput.value = elements.wordInput.value.slice(0, -1);
-  syncWordInputCenterLetterState();
+  handleWordInputChanged();
 }
 
 function focusWordInputForTyping() {
@@ -299,17 +301,40 @@ function setMobileSeedControlsOpen(open) {
   elements.toggleSeedControlsButton.setAttribute("aria-expanded", String(shouldOpen));
 }
 
+function syncLiveDuplicateFeedback() {
+  if (!runtime.activeState) {
+    return;
+  }
+
+  const typedWord = normalizeWord(elements.wordInput.value);
+  const nextLiveDuplicateWord =
+    typedWord.length >= 4 && runtime.activeState.foundWordSet.has(typedWord) ? typedWord : null;
+
+  if (runtime.liveDuplicateWord === nextLiveDuplicateWord) {
+    return;
+  }
+
+  runtime.liveDuplicateWord = nextLiveDuplicateWord;
+  render(runtime.activeState);
+}
+
+function handleWordInputChanged() {
+  syncWordInputCenterLetterState();
+  syncLiveDuplicateFeedback();
+}
+
 function render(state) {
   syncBoardLetters(state);
   elements.board.setLetters(state.puzzle.centerLetter, runtime.boardOuterLetters);
   elements.score.textContent = String(state.score);
   renderRankTrack(state);
   elements.foundCount.textContent = String(state.foundWords.length);
-  elements.feedback.textContent = state.feedback;
-  const feedbackType = state.feedbackType ?? "idle";
+  const feedbackText = runtime.liveDuplicateWord ? "Word already found." : state.feedback;
+  elements.feedback.textContent = feedbackText;
+  const feedbackType = runtime.liveDuplicateWord ? "error" : (state.feedbackType ?? "idle");
   elements.feedback.classList.toggle("is-success", feedbackType === "success");
   elements.feedback.classList.toggle("is-error", feedbackType === "error");
-  elements.feedback.classList.toggle("is-visible", Boolean(state.feedback));
+  elements.feedback.classList.toggle("is-visible", Boolean(feedbackText));
 
   if (runtime.feedbackTimeoutId) {
     clearTimeout(runtime.feedbackTimeoutId);
@@ -413,6 +438,7 @@ async function persistAndRefreshSession(state) {
 
 async function activateState(state) {
   runtime.activeState = state;
+  runtime.liveDuplicateWord = null;
   runtime.boardOuterLetters = [...state.puzzle.outerLetters];
   runtime.boardPuzzleId = state.puzzle.id;
   render(runtime.activeState);
@@ -491,16 +517,29 @@ elements.wordForm.addEventListener("submit", async (event) => {
   }
 
   const rawWord = elements.wordInput.value;
-  runtime.activeState = submitWord(runtime.activeState, rawWord);
-  render(runtime.activeState);
-  await persistAndRefreshSession(runtime.activeState);
+  const submittedWord = normalizeWord(rawWord);
+  const isSubmittingExistingWord = runtime.activeState.foundWordSet.has(submittedWord);
+
+  if (isSubmittingExistingWord) {
+    runtime.activeState = {
+      ...runtime.activeState,
+      feedback: "",
+      feedbackType: "idle"
+    };
+    render(runtime.activeState);
+  } else {
+    runtime.activeState = submitWord(runtime.activeState, rawWord);
+    render(runtime.activeState);
+    await persistAndRefreshSession(runtime.activeState);
+  }
+
   elements.wordInput.value = "";
-  syncWordInputCenterLetterState();
+  handleWordInputChanged();
   focusWordInputForTyping();
 });
 
 elements.wordInput.addEventListener("input", () => {
-  syncWordInputCenterLetterState();
+  handleWordInputChanged();
 });
 
 elements.board.addEventListener("letter-select", (event) => {

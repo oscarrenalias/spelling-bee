@@ -14,6 +14,43 @@ async function appendCenterLetter(page, count = 1) {
   }
 }
 
+async function getWordsForActivePuzzle(page) {
+  const words = await page.evaluate(async () => {
+    const host = document.querySelector("letter-board");
+    if (!host?.shadowRoot) {
+      return null;
+    }
+
+    const centerNode = host.shadowRoot.querySelector("text[data-slot='center']");
+    const outerNodes = [...host.shadowRoot.querySelectorAll("text[data-slot='0'], text[data-slot='1'], text[data-slot='2'], text[data-slot='3'], text[data-slot='4'], text[data-slot='5']")];
+
+    const centerLetter = centerNode?.textContent?.trim().toLowerCase();
+    const outerLetters = outerNodes.map((node) => node.textContent?.trim().toLowerCase()).filter(Boolean);
+    if (!centerLetter || outerLetters.length !== 6) {
+      return null;
+    }
+
+    const response = await fetch("/data/puzzles-v1.json");
+    const payload = await response.json();
+    const puzzles = Array.isArray(payload) ? payload : payload?.puzzles;
+    if (!Array.isArray(puzzles)) {
+      return null;
+    }
+    const sortedOuter = [...outerLetters].sort().join("");
+    const match = puzzles.find(
+      (puzzle) => puzzle.centerLetter === centerLetter && [...puzzle.outerLetters].sort().join("") === sortedOuter
+    );
+
+    if (!match) {
+      return null;
+    }
+
+    return match.validWords.slice(0, 10);
+  });
+
+  return words;
+}
+
 test.describe("core ui smoke", () => {
   test("loads game shell and allows keyboard submission", async ({ page }) => {
     await gotoAndWaitForReady(page);
@@ -397,5 +434,42 @@ test.describe("core ui smoke", () => {
     expect(centerLabelMetrics.y).toBeTruthy();
     expect(centerLabelMetrics.width).toBeGreaterThan(0);
     expect(centerLabelMetrics.height).toBeGreaterThan(0);
+  });
+
+  test("typing shows duplicate feedback only for exact found words", async ({ page }) => {
+    await gotoAndWaitForReady(page);
+
+    const words = await getWordsForActivePuzzle(page);
+    expect(words).not.toBeNull();
+    expect(words.length).toBeGreaterThan(1);
+
+    const firstWord = words.find((word) => typeof word === "string" && word.length >= 4);
+    const secondWord = words.find((word) => typeof word === "string" && word.length >= 4 && word !== firstWord);
+    expect(firstWord).toBeTruthy();
+    expect(secondWord).toBeTruthy();
+
+    const input = page.locator("#word-input");
+    const feedback = page.locator("#feedback");
+
+    await input.fill(firstWord);
+    await page.locator("#submit-word").click();
+    await expect(feedback).toContainText("Accepted");
+
+    await input.fill(firstWord.slice(0, firstWord.length - 1));
+    await expect(feedback).not.toHaveText("Word already found.");
+
+    await input.fill(firstWord);
+    await expect(feedback).toHaveText("Word already found.");
+
+    await page.locator("#submit-word").click();
+    await expect(feedback).toHaveText("");
+
+    await input.fill(`${firstWord}x`);
+    await expect(feedback).not.toHaveText("Word already found.");
+
+    await input.fill(secondWord);
+    await expect(feedback).not.toHaveText("Word already found.");
+    await page.locator("#submit-word").click();
+    await expect(feedback).toContainText("Accepted");
   });
 });
