@@ -307,13 +307,29 @@ function renderSessionsList() {
   elements.sessions.innerHTML = "";
 
   const sorted = [...runtime.sessionsCache].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+  const activeSessionId = runtime.activeState?.sessionId ?? null;
 
   for (const session of sorted) {
     const li = document.createElement("li");
+    const isActive = Boolean(activeSessionId) && session.sessionId === activeSessionId;
+
+    if (isActive) {
+      li.classList.add("is-active-session");
+    }
+
     const button = document.createElement("button");
     button.type = "button";
     button.dataset.sessionId = session.sessionId;
     button.textContent = `${session.source.toUpperCase()} - ${session.puzzleId} - ${toRankLabel(session.rankKey)} (${session.score})`;
+
+    if (isActive) {
+      button.setAttribute("aria-current", "true");
+      const badge = document.createElement("span");
+      badge.className = "session-current-badge";
+      badge.textContent = "Current";
+      button.append(" ", badge);
+    }
+
     li.append(button);
     elements.sessions.append(li);
   }
@@ -479,6 +495,7 @@ elements.sessions.addEventListener("click", async (event) => {
 
   runtime.activeState = hydrated;
   render(runtime.activeState);
+  renderSessionsList();
 });
 
 document.addEventListener("keydown", (event) => {

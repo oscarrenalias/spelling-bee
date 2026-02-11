@@ -472,8 +472,16 @@ ul {
   border-bottom: 1px solid var(--line);
 }
 
+#sessions li.is-active-session {
+  background: color-mix(in srgb, var(--accent) 20%, var(--panel-alt) 80%);
+}
+
 #sessions button {
   width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
   text-align: left;
   border-radius: 0;
   border: 0;
@@ -481,6 +489,23 @@ ul {
   color: var(--ink);
   padding: 0;
   font: inherit;
+}
+
+#sessions button[aria-current="true"] {
+  font-weight: 700;
+}
+
+.session-current-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.2;
+  background: color-mix(in srgb, var(--accent) 85%, #f5dc78 15%);
+  color: color-mix(in srgb, var(--accent-border) 75%, #3b2b00 25%);
 }
 
 table {
