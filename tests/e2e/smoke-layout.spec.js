@@ -472,4 +472,18 @@ test.describe("core ui smoke", () => {
     await page.locator("#submit-word").click();
     await expect(feedback).toContainText("Accepted");
   });
+
+  test("submit error feedback clears when input is edited to empty", async ({ page }) => {
+    await gotoAndWaitForReady(page);
+
+    const input = page.locator("#word-input");
+    const feedback = page.locator("#feedback");
+
+    await input.fill("1234");
+    await page.locator("#submit-word").click();
+    await expect(feedback).toContainText("Only letters a-z are allowed.");
+
+    await input.fill("");
+    await expect(feedback).toHaveText("");
+  });
 });

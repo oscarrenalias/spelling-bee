@@ -318,9 +318,22 @@ function syncLiveDuplicateFeedback() {
   render(runtime.activeState);
 }
 
-function handleWordInputChanged() {
+function handleWordInputChanged(clearErrorFeedback = true) {
   syncWordInputCenterLetterState();
   syncLiveDuplicateFeedback();
+
+  if (!clearErrorFeedback || !runtime.activeState || runtime.liveDuplicateWord) {
+    return;
+  }
+
+  if (runtime.activeState.feedbackType === "error" && runtime.activeState.feedback) {
+    runtime.activeState = {
+      ...runtime.activeState,
+      feedback: "",
+      feedbackType: "idle"
+    };
+    render(runtime.activeState);
+  }
 }
 
 function render(state) {
@@ -531,10 +544,15 @@ elements.wordForm.addEventListener("submit", async (event) => {
     runtime.activeState = submitWord(runtime.activeState, rawWord);
     render(runtime.activeState);
     await persistAndRefreshSession(runtime.activeState);
+
+    if (runtime.activeState.feedbackType !== "success") {
+      focusWordInputForTyping();
+      return;
+    }
   }
 
   elements.wordInput.value = "";
-  handleWordInputChanged();
+  handleWordInputChanged(false);
   focusWordInputForTyping();
 });
 
