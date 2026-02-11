@@ -168,6 +168,10 @@ button {
   align-items: center;
 }
 
+.seed-toggle-button {
+  display: none;
+}
+
 .seed-form input {
   width: 170px;
   padding: 0.5rem 0.6rem;
@@ -553,17 +557,41 @@ td {
 
 @media (max-width: 900px) {
   .topbar {
-    align-items: flex-start;
+    align-items: center;
     padding: 0.5rem 0.7rem;
   }
 
+  .title-group {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.45rem;
+  }
+
+  .topbar-actions {
+    flex-wrap: nowrap;
+    justify-content: flex-end;
+    align-items: center;
+  }
+
+  .seed-toggle-button {
+    display: inline-flex;
+  }
+
   .seed-form {
+    display: none;
     width: 100%;
+    flex-basis: 100%;
+    order: 10;
   }
 
   .seed-form input {
     width: 100%;
     min-width: 0;
+  }
+
+  .seed-form.is-open-mobile {
+    display: flex;
+    margin-top: 0.35rem;
   }
 
   .brand-logo {
@@ -575,11 +603,29 @@ td {
   }
 
   .status-summary {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.55rem;
   }
 
   .rank-summary {
-    grid-column: 1 / -1;
+    grid-column: auto;
+  }
+
+  .status-panel {
+    padding: 0.75rem 0.8rem 0.85rem;
+  }
+
+  .score-chip strong,
+  .rank-summary strong,
+  .found-summary strong {
+    font-size: 1.28rem;
+  }
+
+  .rank-progress {
+    font-size: 0.8rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .open-sessions-button,
@@ -616,7 +662,21 @@ td {
   }
 
   .status-panel {
-    padding-bottom: 0.9rem;
+    padding: 0.65rem 0.7rem 0.75rem;
+  }
+
+  .status-label {
+    font-size: 0.69rem;
+  }
+
+  .score-chip strong,
+  .rank-summary strong,
+  .found-summary strong {
+    font-size: 1.12rem;
+  }
+
+  .rank-progress {
+    font-size: 0.75rem;
   }
 
   .rank-track {

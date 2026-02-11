@@ -36,6 +36,7 @@ const elements = {
   openSessionsButton: document.getElementById("open-sessions"),
   closeSessionsButton: document.getElementById("close-sessions"),
   sessionsBackdrop: document.getElementById("sessions-backdrop"),
+  toggleSeedControlsButton: document.getElementById("toggle-seed-controls"),
   newRandomButton: document.getElementById("new-random-game"),
   shuffleLettersButton: document.getElementById("shuffle-letters"),
   seedForm: document.getElementById("seed-form"),
@@ -52,7 +53,8 @@ const runtime = {
   boardPuzzleId: null,
   feedbackTimeoutId: null,
   rankTrackSnapshot: null,
-  mobileSessionsOpen: false
+  mobileSessionsOpen: false,
+  mobileSeedControlsOpen: false
 };
 
 const SUCCESS_FEEDBACK_TIMEOUT_MS = 2600;
@@ -281,6 +283,13 @@ function setMobileSessionsOpen(open) {
   elements.openSessionsButton.setAttribute("aria-expanded", String(shouldOpen));
 }
 
+function setMobileSeedControlsOpen(open) {
+  runtime.mobileSeedControlsOpen = open;
+  const shouldOpen = open && isMobileViewport();
+  elements.seedForm.classList.toggle("is-open-mobile", shouldOpen);
+  elements.toggleSeedControlsButton.setAttribute("aria-expanded", String(shouldOpen));
+}
+
 function render(state) {
   syncBoardLetters(state);
   elements.board.setLetters(state.puzzle.centerLetter, runtime.boardOuterLetters);
@@ -460,6 +469,10 @@ window.addEventListener("resize", () => {
   if (!isMobileViewport() && runtime.mobileSessionsOpen) {
     setMobileSessionsOpen(false);
   }
+
+  if (!isMobileViewport() && runtime.mobileSeedControlsOpen) {
+    setMobileSeedControlsOpen(false);
+  }
 });
 
 elements.wordForm.addEventListener("submit", async (event) => {
@@ -498,6 +511,10 @@ elements.openSessionsButton.addEventListener("click", () => {
   setMobileSessionsOpen(true);
 });
 
+elements.toggleSeedControlsButton.addEventListener("click", () => {
+  setMobileSeedControlsOpen(!runtime.mobileSeedControlsOpen);
+});
+
 elements.closeSessionsButton.addEventListener("click", () => {
   setMobileSessionsOpen(false);
 });
@@ -531,6 +548,7 @@ elements.seedForm.addEventListener("submit", async (event) => {
 
   await startRandomSession(rawSeed);
   elements.seedInput.value = "";
+  setMobileSeedControlsOpen(false);
 });
 
 elements.toggleHintsButton.addEventListener("click", () => {

@@ -85,12 +85,50 @@ test.describe("core ui smoke", () => {
     await expect(page.locator(".session-panel")).toBeHidden();
   });
 
+  test("mobile top bar keeps seed controls collapsed by default", async ({ page, isMobile }) => {
+    test.skip(!isMobile, "Mobile-only assertion");
+    await gotoAndWaitForReady(page);
+
+    await expect(page.locator("#toggle-seed-controls")).toBeVisible();
+    await expect(page.locator("#seed-form")).toBeHidden();
+
+    await page.locator("#toggle-seed-controls").click();
+    await expect(page.locator("#seed-form")).toBeVisible();
+    await expect(page.locator("#toggle-seed-controls")).toHaveAttribute("aria-expanded", "true");
+  });
+
+  test("mobile status summary keeps score rank and found on one row", async ({ page, isMobile }) => {
+    test.skip(!isMobile, "Mobile-only assertion");
+    await gotoAndWaitForReady(page);
+
+    const rowMetrics = await page.evaluate(() => {
+      const score = document.querySelector(".score-chip");
+      const rank = document.querySelector(".rank-summary");
+      const found = document.querySelector(".found-summary");
+      if (!score || !rank || !found) {
+        return null;
+      }
+
+      const scoreTop = score.getBoundingClientRect().top;
+      const rankTop = rank.getBoundingClientRect().top;
+      const foundTop = found.getBoundingClientRect().top;
+      return {
+        maxDelta: Math.max(Math.abs(scoreTop - rankTop), Math.abs(scoreTop - foundTop), Math.abs(rankTop - foundTop))
+      };
+    });
+
+    expect(rowMetrics).not.toBeNull();
+    expect(rowMetrics.maxDelta).toBeLessThan(10);
+  });
+
   test("desktop keeps inline sessions panel visible", async ({ page, isMobile }) => {
     test.skip(isMobile, "Desktop-only assertion");
     await gotoAndWaitForReady(page);
 
     await expect(page.locator(".session-panel")).toBeVisible();
     await expect(page.locator("#open-sessions")).toBeHidden();
+    await expect(page.locator("#toggle-seed-controls")).toBeHidden();
+    await expect(page.locator("#seed-form")).toBeVisible();
   });
 
   test("board click/tap, delete, and submit controls work", async ({ page }) => {
