@@ -203,7 +203,7 @@ button:active {
   row-gap: 0;
   padding: 0.5rem 0.8rem 0.55rem;
   margin-bottom: 1rem;
-  background: linear-gradient(180deg, color-mix(in srgb, var(--panel) 88%, #00111e 12%), var(--panel));
+  background: transparent;
 }
 
 .rank-name {
