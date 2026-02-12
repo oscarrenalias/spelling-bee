@@ -117,6 +117,7 @@ npm run prepare:sources
 npm run build:dictionary
 npm run build:puzzles
 npm run build:data
+npm run build:data:with-puzzles
 ```
 
 If tuning frequency filtering, edit `data/raw/policy.json` and rebuild:

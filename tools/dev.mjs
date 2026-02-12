@@ -12,6 +12,7 @@ const rootDir = path.resolve(__dirname, "..");
 const PORT = Number(process.env.PORT ?? 8080);
 const HOST = process.env.HOST ?? "127.0.0.1";
 const PUZZLE_COUNT = Number(process.env.PUZZLE_COUNT ?? 14);
+const DEV_BUILD_PUZZLES = process.env.DEV_BUILD_PUZZLES === "true";
 
 const watchTargets = [
   path.join(rootDir, "src"),
@@ -72,7 +73,11 @@ async function runBuild(reason) {
 
   try {
     await runNode(["tools/build-dictionary.mjs"]);
-    await runNode(["tools/build-puzzles.mjs", `--count=${PUZZLE_COUNT}`]);
+    if (DEV_BUILD_PUZZLES) {
+      await runNode(["tools/build-puzzles.mjs", `--count=${PUZZLE_COUNT}`]);
+    } else {
+      console.log("[dev] Skipping puzzle build (set DEV_BUILD_PUZZLES=true to enable).");
+    }
     await runNode(["tools/check-code.mjs"]);
     const duration = Date.now() - start;
     console.log(`[dev] Build finished in ${duration}ms`);
