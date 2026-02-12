@@ -7,6 +7,7 @@ import { loadSessionById, loadSessions, saveSession } from "./storage/repositori
 import { normalizeWord } from "./core/validator.js";
 
 const HINTS_VISIBILITY_KEY = "spelling-bee:hints-visible";
+const FOUND_WORDS_VISIBILITY_KEY = "spelling-bee:found-words-visible";
 const LETTER_KEY_PATTERN = /^[a-z]$/i;
 
 const elements = {
@@ -25,7 +26,9 @@ const elements = {
   rankName: document.getElementById("rank-name"),
   rankTrack: document.getElementById("rank-track"),
   foundHeading: document.getElementById("found-heading"),
+  foundWordsContent: document.getElementById("found-words-content"),
   foundWords: document.getElementById("found-words"),
+  toggleFoundWordsButton: document.getElementById("toggle-found-words"),
   remainingPoints: document.getElementById("remaining-points"),
   remainingCount: document.getElementById("remaining-count"),
   hintPrefixes: document.getElementById("hint-prefixes"),
@@ -50,6 +53,7 @@ const runtime = {
   activeState: null,
   sessionsCache: [],
   hintsVisible: true,
+  foundWordsVisible: true,
   boardOuterLetters: null,
   boardPuzzleId: null,
   feedbackTimeoutId: null,
@@ -274,8 +278,12 @@ function shouldCaptureGlobalTyping(event) {
 
 function renderHintsVisibility() {
   elements.hintsContent.hidden = !runtime.hintsVisible;
-  elements.toggleHintsButton.textContent = runtime.hintsVisible ? "Hide Hints" : "Show Hints";
   elements.toggleHintsButton.setAttribute("aria-expanded", String(runtime.hintsVisible));
+}
+
+function renderFoundWordsVisibility() {
+  elements.foundWordsContent.hidden = !runtime.foundWordsVisible;
+  elements.toggleFoundWordsButton.setAttribute("aria-expanded", String(runtime.foundWordsVisible));
 }
 
 function isMobileViewport() {
@@ -506,7 +514,9 @@ async function startRandomSession(seed = createSeed()) {
 async function boot() {
   renderInitLoading("Loading settings...");
   runtime.hintsVisible = localStorage.getItem(HINTS_VISIBILITY_KEY) !== "false";
+  runtime.foundWordsVisible = localStorage.getItem(FOUND_WORDS_VISIBILITY_KEY) !== "false";
   renderHintsVisibility();
+  renderFoundWordsVisibility();
 
   renderInitLoading("Loading puzzle definitions...");
   runtime.puzzles = await loadPuzzles();
@@ -661,6 +671,12 @@ elements.toggleHintsButton.addEventListener("click", () => {
   runtime.hintsVisible = !runtime.hintsVisible;
   localStorage.setItem(HINTS_VISIBILITY_KEY, String(runtime.hintsVisible));
   renderHintsVisibility();
+});
+
+elements.toggleFoundWordsButton.addEventListener("click", () => {
+  runtime.foundWordsVisible = !runtime.foundWordsVisible;
+  localStorage.setItem(FOUND_WORDS_VISIBILITY_KEY, String(runtime.foundWordsVisible));
+  renderFoundWordsVisibility();
 });
 
 elements.sessions.addEventListener("click", async (event) => {

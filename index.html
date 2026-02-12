@@ -97,15 +97,38 @@
 
         <aside class="right-panel">
           <section class="found-panel">
-            <h2 id="found-heading">No words found yet</h2>
+            <div class="panel-header">
+              <h2>
+                <button
+                  id="toggle-found-words"
+                  type="button"
+                  class="disclosure-toggle"
+                  aria-controls="found-words-content"
+                  aria-expanded="true"
+                >
+                  <span id="found-heading">No words found yet</span>
+                </button>
+              </h2>
+            </div>
             <p id="puzzle-display" class="puzzle-display">Puzzle: -</p>
-            <ul id="found-words"></ul>
+            <div id="found-words-content">
+              <ul id="found-words"></ul>
+            </div>
           </section>
 
           <section class="hints-panel">
             <div class="panel-header">
-              <h2>Hints</h2>
-              <button id="toggle-hints" type="button" class="secondary-button">Hide Hints</button>
+              <h2>
+                <button
+                  id="toggle-hints"
+                  type="button"
+                  class="disclosure-toggle"
+                  aria-controls="hints-content"
+                  aria-expanded="true"
+                >
+                  Hints
+                </button>
+              </h2>
             </div>
             <div id="hints-content">
               <p><strong>Remaining points:</strong> <span id="remaining-points">0</span></p>

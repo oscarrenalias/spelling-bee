@@ -622,6 +622,24 @@ test.describe("core ui smoke", () => {
     await expect(foundHeading).toHaveText("2 Words Found");
   });
 
+  test("found words list can be collapsed and expanded", async ({ page }) => {
+    await gotoAndWaitForReady(page);
+
+    const toggle = page.locator("#toggle-found-words");
+    const content = page.locator("#found-words-content");
+
+    await expect(toggle).toHaveAttribute("aria-expanded", "true");
+    await expect(content).toBeVisible();
+
+    await toggle.click();
+    await expect(toggle).toHaveAttribute("aria-expanded", "false");
+    await expect(content).toBeHidden();
+
+    await toggle.click();
+    await expect(toggle).toHaveAttribute("aria-expanded", "true");
+    await expect(content).toBeVisible();
+  });
+
   test("submit error feedback clears when input is edited to empty", async ({ page }) => {
     await gotoAndWaitForReady(page);
 
