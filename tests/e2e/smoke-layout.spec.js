@@ -84,41 +84,13 @@ async function getActivePuzzleId(page) {
   return puzzleId;
 }
 
-async function getSeedForDifferentPuzzle(page, puzzleId) {
-  const seed = await page.evaluate(async ({ puzzleId }) => {
+async function getPuzzleCount(page) {
+  return page.evaluate(async () => {
     const response = await fetch("/data/puzzles-v1.json");
     const payload = await response.json();
     const puzzles = Array.isArray(payload) ? payload : payload?.puzzles;
-    if (!Array.isArray(puzzles) || puzzles.length < 2) {
-      return null;
-    }
-
-    const currentIndex = puzzles.findIndex((puzzle) => puzzle.id === puzzleId);
-    if (currentIndex < 0) {
-      return null;
-    }
-
-    const targetIndex = (currentIndex + 1) % puzzles.length;
-    const hashSeed = (rawSeed) => {
-      let hash = 0;
-      for (let idx = 0; idx < rawSeed.length; idx += 1) {
-        hash = (hash << 5) - hash + rawSeed.charCodeAt(idx);
-        hash |= 0;
-      }
-      return Math.abs(hash);
-    };
-
-    for (let attempt = 0; attempt < 100_000; attempt += 1) {
-      const candidate = `go-to-today-${attempt}`;
-      if (hashSeed(candidate) % puzzles.length === targetIndex) {
-        return candidate;
-      }
-    }
-
-    return null;
-  }, { puzzleId });
-
-  return seed;
+    return Array.isArray(puzzles) ? puzzles.length : 0;
+  });
 }
 
 test.describe("core ui smoke", () => {
@@ -224,31 +196,23 @@ test.describe("core ui smoke", () => {
     await expect(page.locator("#sessions-backdrop")).toBeHidden();
   });
 
-  test("mobile top bar keeps seed controls collapsed by default", async ({ page, isMobile }) => {
+  test("mobile top bar keeps seed controls hidden", async ({ page, isMobile }) => {
     test.skip(!isMobile, "Mobile-only assertion");
     await gotoAndWaitForReady(page);
 
-    await expect(page.locator("#toggle-seed-controls")).toBeVisible();
+    await expect(page.locator("#toggle-seed-controls")).toBeHidden();
     await expect(page.locator("#seed-form")).toBeHidden();
-
-    await page.locator("#toggle-seed-controls").click();
-    await expect(page.locator("#seed-form")).toBeVisible();
-    await expect(page.locator("#toggle-seed-controls")).toHaveAttribute("aria-expanded", "true");
   });
 
-  test("mobile seed controls collapse again after starting a seed game", async ({ page, isMobile }) => {
+  test("mobile seed controls stay hidden after starting a random game", async ({ page, isMobile }) => {
     test.skip(!isMobile, "Mobile-only assertion");
     await gotoAndWaitForReady(page);
 
-    await page.locator("#toggle-seed-controls").click();
-    await expect(page.locator("#seed-form")).toBeVisible();
-    await expect(page.locator("#toggle-seed-controls")).toHaveAttribute("aria-expanded", "true");
-
-    await page.locator("#seed-input").fill("smoke-seed");
-    await page.locator("#seed-form button[type='submit']").click();
-
+    await expect(page.locator("#toggle-seed-controls")).toBeHidden();
     await expect(page.locator("#seed-form")).toBeHidden();
-    await expect(page.locator("#toggle-seed-controls")).toHaveAttribute("aria-expanded", "false");
+    await page.locator("#new-random-game").click();
+    await expect(page.locator("#seed-form")).toBeHidden();
+    await expect(page.locator("#toggle-seed-controls")).toBeHidden();
   });
 
   test("mobile status panel keeps rank track visible", async ({ page, isMobile }) => {
@@ -393,20 +357,18 @@ test.describe("core ui smoke", () => {
 
     await page.setViewportSize({ width: 820, height: 900 });
     await expect(page.locator("#open-sessions")).toBeVisible();
-    await expect(page.locator("#toggle-seed-controls")).toBeVisible();
+    await expect(page.locator("#toggle-seed-controls")).toBeHidden();
+    await expect(page.locator("#seed-form")).toBeHidden();
 
-    await page.locator("#toggle-seed-controls").click();
     await page.locator("#open-sessions").click();
     await expect(page.locator("#open-sessions")).toHaveAttribute("aria-expanded", "true");
-    await expect(page.locator("#toggle-seed-controls")).toHaveAttribute("aria-expanded", "true");
     await expect(page.locator(".session-panel")).toBeVisible();
-    await expect(page.locator("#seed-form")).toBeVisible();
 
     await page.setViewportSize({ width: 1200, height: 900 });
     await expect(page.locator("#open-sessions")).toHaveAttribute("aria-expanded", "false");
-    await expect(page.locator("#toggle-seed-controls")).toHaveAttribute("aria-expanded", "false");
+    await expect(page.locator("#toggle-seed-controls")).toBeHidden();
     await expect(page.locator("#sessions-backdrop")).toBeHidden();
-    await expect(page.locator("#seed-form")).toBeVisible();
+    await expect(page.locator("#seed-form")).toBeHidden();
   });
 
   test("desktop keeps found-words list internally scrollable", async ({ page, isMobile }) => {
@@ -481,30 +443,25 @@ test.describe("core ui smoke", () => {
     await expect(page.locator("#open-sessions")).toHaveAttribute("aria-expanded", "false");
     await expect(page.locator(".session-panel")).toBeHidden();
     await expect(page.locator("#sessions-backdrop")).toBeHidden();
-    await expect(page.locator("#seed-form")).toBeVisible();
+    await expect(page.locator("#seed-form")).toBeHidden();
   });
 
-  test("go to today button switches from a non-today puzzle back to today's puzzle", async ({ page, isMobile }) => {
+  test("go to today button switches from a non-today puzzle back to today's puzzle", async ({ page }) => {
     await gotoAndWaitForReady(page);
+    const puzzleCount = await getPuzzleCount(page);
+    test.skip(puzzleCount < 2, "Requires at least two puzzles");
 
     const todayPuzzleId = await getActivePuzzleId(page);
     expect(todayPuzzleId).toBeTruthy();
     await expect(page.locator("#puzzle-display")).toHaveText(new RegExp(`^Puzzle: ${todayPuzzleId} \\((Simple|Medium|Hard)\\)$`));
 
     await expect(page.locator("#go-to-today")).toBeHidden();
-
-    const seed = await getSeedForDifferentPuzzle(page, todayPuzzleId);
-    expect(seed).toBeTruthy();
-
-    if (isMobile) {
-      await page.locator("#toggle-seed-controls").click();
-      await expect(page.locator("#seed-form")).toBeVisible();
+    let otherPuzzleId = todayPuzzleId;
+    for (let attempt = 0; attempt < 30 && otherPuzzleId === todayPuzzleId; attempt += 1) {
+      await page.locator("#new-random-game").click();
+      otherPuzzleId = await getActivePuzzleId(page);
     }
 
-    await page.locator("#seed-input").fill(seed);
-    await page.locator("#seed-form button[type='submit']").click();
-
-    const otherPuzzleId = await getActivePuzzleId(page);
     expect(otherPuzzleId).toBeTruthy();
     expect(otherPuzzleId).not.toBe(todayPuzzleId);
     await expect(page.locator("#puzzle-display")).toHaveText(new RegExp(`^Puzzle: ${otherPuzzleId} \\((Simple|Medium|Hard)\\)$`));
