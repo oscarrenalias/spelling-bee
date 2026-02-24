@@ -8,7 +8,8 @@ template.innerHTML = `
     }
 
     .wrap {
-      max-width: 520px;
+      width: 100%;
+      max-width: 100%;
       margin: 0 auto;
     }
 
@@ -38,7 +39,7 @@ template.innerHTML = `
 
     .letter {
       fill: var(--board-letter, #111111);
-      font-size: 44px;
+      font-size: 40px;
       font-weight: 800;
       text-anchor: middle;
       dominant-baseline: middle;
@@ -50,11 +51,11 @@ template.innerHTML = `
 
     @media (max-width: 560px) {
       .wrap {
-        max-width: 380px;
+        max-width: 100%;
       }
 
       .letter {
-        font-size: 36px;
+        font-size: 33px;
       }
     }
   </style>

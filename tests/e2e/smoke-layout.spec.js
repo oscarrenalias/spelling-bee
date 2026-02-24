@@ -466,13 +466,21 @@ test.describe("core ui smoke", () => {
     expect(wasDefaultPrevented).toBe(true);
   });
 
-  test("desktop keeps inline sessions panel visible", async ({ page, isMobile }) => {
+  test("desktop opens sessions panel only on demand", async ({ page, isMobile }) => {
     test.skip(isMobile, "Desktop-only assertion");
     await gotoAndWaitForReady(page);
 
+    await expect(page.locator(".session-panel")).toBeHidden();
+    await expect(page.locator("#open-sessions")).toBeVisible();
+    await page.locator("#open-sessions").click();
+    await expect(page.locator("#open-sessions")).toHaveAttribute("aria-expanded", "true");
     await expect(page.locator(".session-panel")).toBeVisible();
-    await expect(page.locator("#open-sessions")).toBeHidden();
-    await expect(page.locator("#toggle-seed-controls")).toBeHidden();
+    await expect(page.locator("#sessions-backdrop")).toBeVisible();
+
+    await page.locator("#close-sessions").click();
+    await expect(page.locator("#open-sessions")).toHaveAttribute("aria-expanded", "false");
+    await expect(page.locator(".session-panel")).toBeHidden();
+    await expect(page.locator("#sessions-backdrop")).toBeHidden();
     await expect(page.locator("#seed-form")).toBeVisible();
   });
 
@@ -481,7 +489,7 @@ test.describe("core ui smoke", () => {
 
     const todayPuzzleId = await getActivePuzzleId(page);
     expect(todayPuzzleId).toBeTruthy();
-    await expect(page.locator("#puzzle-display")).toHaveText(`Puzzle: ${todayPuzzleId}`);
+    await expect(page.locator("#puzzle-display")).toHaveText(new RegExp(`^Puzzle: ${todayPuzzleId} \\((Simple|Medium|Hard)\\)$`));
 
     await expect(page.locator("#go-to-today")).toBeHidden();
 
@@ -499,13 +507,13 @@ test.describe("core ui smoke", () => {
     const otherPuzzleId = await getActivePuzzleId(page);
     expect(otherPuzzleId).toBeTruthy();
     expect(otherPuzzleId).not.toBe(todayPuzzleId);
-    await expect(page.locator("#puzzle-display")).toHaveText(`Puzzle: ${otherPuzzleId}`);
+    await expect(page.locator("#puzzle-display")).toHaveText(new RegExp(`^Puzzle: ${otherPuzzleId} \\((Simple|Medium|Hard)\\)$`));
 
     await expect(page.locator("#go-to-today")).toBeVisible();
     await page.locator("#go-to-today").click();
 
     await expect.poll(async () => getActivePuzzleId(page)).toBe(todayPuzzleId);
-    await expect(page.locator("#puzzle-display")).toHaveText(`Puzzle: ${todayPuzzleId}`);
+    await expect(page.locator("#puzzle-display")).toHaveText(new RegExp(`^Puzzle: ${todayPuzzleId} \\((Simple|Medium|Hard)\\)$`));
     await expect(page.locator("#go-to-today")).toBeHidden();
   });
 

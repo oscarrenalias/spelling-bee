@@ -1,8 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createInitialState, decoratePuzzle, submitWord } from "../src/core/game-engine.js";
-import { openDb } from "../src/storage/idb.js";
-import { loadSessionById, loadSessions, saveSession } from "../src/storage/repositories.js";
+import { openDb, withStore } from "../src/storage/idb.js";
+import { invalidateLegacySessionsOnce, loadSessionById, loadSessions, saveSession } from "../src/storage/repositories.js";
 import { createFakeIndexedDb } from "./helpers/fake-indexeddb.js";
 
 const DB_NAME = "renalias_spelling_bee_webapp_db";
@@ -211,4 +211,35 @@ test("openDb tolerates pre-existing higher db version", { concurrency: false }, 
   const session = await loadSessionById("higher-version-session");
   assert.equal(session.sessionId, "higher-version-session");
   assert.equal(session.score, 1);
+});
+
+test("invalidateLegacySessionsOnce clears sessions only one time", { concurrency: false }, async (t) => {
+  installFakeIndexedDb(t);
+
+  let session = createInitialState(puzzleA, { source: "daily" });
+  session = submitWord(session, "acre");
+  await saveSession(session);
+  assert.equal((await loadSessions()).length, 1);
+
+  const firstRunInvalidated = await invalidateLegacySessionsOnce();
+  assert.equal(firstRunInvalidated, true);
+  assert.equal((await loadSessions()).length, 0);
+
+  const marker = await withStore("app_meta", "readonly", (store) => {
+    return new Promise((resolve, reject) => {
+      const request = store.get("session_invalidation_version");
+      request.onsuccess = () => resolve(request.result ?? null);
+      request.onerror = () => reject(request.error ?? new Error("Unable to read invalidation marker"));
+    });
+  });
+  assert.equal(typeof marker?.value, "string");
+
+  let nextSession = createInitialState(puzzleB, { source: "random", seed: "seed-after-invalidation" });
+  nextSession = submitWord(nextSession, "bloom");
+  await saveSession(nextSession);
+  assert.equal((await loadSessions()).length, 1);
+
+  const secondRunInvalidated = await invalidateLegacySessionsOnce();
+  assert.equal(secondRunInvalidated, false);
+  assert.equal((await loadSessions()).length, 1);
 });

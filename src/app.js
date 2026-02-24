@@ -3,7 +3,7 @@ import { createInitialState, submitWord } from "./core/game-engine.js";
 import { RANK_ORDER, toRankLabel } from "./core/rankings.js";
 import { getDailyPuzzle, loadPuzzles } from "./puzzles/provider.js";
 import { createSeed, pickPuzzleBySeed } from "./puzzles/random-generator.js";
-import { loadSessionById, loadSessions, saveSession } from "./storage/repositories.js";
+import { invalidateLegacySessionsOnce, loadSessionById, loadSessions, saveSession } from "./storage/repositories.js";
 import { normalizeWord } from "./core/validator.js";
 
 const HINTS_VISIBILITY_KEY = "spelling-bee:hints-visible";
@@ -58,9 +58,10 @@ const runtime = {
   boardPuzzleId: null,
   feedbackTimeoutId: null,
   rankTrackSnapshot: null,
-  mobileSessionsOpen: false,
+  sessionsOpen: false,
   mobileSeedControlsOpen: false,
-  liveDuplicateWord: null
+  liveDuplicateWord: null,
+  wasMobileViewport: false
 };
 
 const SUCCESS_FEEDBACK_TIMEOUT_MS = 2600;
@@ -186,6 +187,26 @@ function formatFoundHeading(foundWordsCount) {
   return `${foundWordsCount} Words Found`;
 }
 
+function toDifficultyLabel(difficulty) {
+  if (difficulty === "simple") {
+    return "Simple";
+  }
+  if (difficulty === "medium") {
+    return "Medium";
+  }
+  if (difficulty === "hard") {
+    return "Hard";
+  }
+  return "";
+}
+
+function formatSessionLabel(session, puzzle) {
+  const source = session.source.toUpperCase();
+  const difficultyLabel = toDifficultyLabel(puzzle?.difficulty) || "Unknown";
+  const rankLabel = toRankLabel(session.rankKey);
+  return `${source} - ${session.puzzleId} - Difficulty: ${difficultyLabel} - Rank: ${rankLabel} (${session.score})`;
+}
+
 function renderInitLoading(message) {
   elements.initMessage.textContent = message;
   elements.initError.hidden = true;
@@ -290,10 +311,10 @@ function isMobileViewport() {
   return window.matchMedia("(max-width: 900px)").matches;
 }
 
-function setMobileSessionsOpen(open) {
-  runtime.mobileSessionsOpen = open;
-  const shouldOpen = open && isMobileViewport();
-  elements.sessionPanel.classList.toggle("is-open-mobile", shouldOpen);
+function setSessionsOpen(open) {
+  runtime.sessionsOpen = open;
+  const shouldOpen = open;
+  elements.sessionPanel.classList.toggle("is-open", shouldOpen);
   elements.sessionsBackdrop.hidden = !shouldOpen;
   elements.openSessionsButton.setAttribute("aria-expanded", String(shouldOpen));
 }
@@ -345,7 +366,9 @@ function render(state) {
   elements.goToTodayButton.hidden = !todayPuzzleId || todayPuzzleId === state.puzzle.id;
   syncBoardLetters(state);
   elements.board.setLetters(state.puzzle.centerLetter, runtime.boardOuterLetters);
-  elements.puzzleDisplay.textContent = `Puzzle: ${state.puzzle.date ?? state.puzzle.id}`;
+  const puzzleId = state.puzzle.date ?? state.puzzle.id;
+  const difficultyLabel = toDifficultyLabel(state.puzzle.difficulty);
+  elements.puzzleDisplay.textContent = difficultyLabel ? `Puzzle: ${puzzleId} (${difficultyLabel})` : `Puzzle: ${puzzleId}`;
   elements.foundHeading.textContent = formatFoundHeading(state.foundWords.length);
   renderRankTrack(state);
   const feedbackText = runtime.liveDuplicateWord ? "Word already found." : state.feedback;
@@ -418,7 +441,8 @@ function renderSessionsList() {
     const button = document.createElement("button");
     button.type = "button";
     button.dataset.sessionId = session.sessionId;
-    button.textContent = `${session.source.toUpperCase()} - ${session.puzzleId} - ${toRankLabel(session.rankKey)} (${session.score})`;
+    const puzzle = runtime.puzzles.find((item) => item.id === session.puzzleId);
+    button.textContent = formatSessionLabel(session, puzzle);
 
     if (isActive) {
       button.setAttribute("aria-current", "true");
@@ -515,11 +539,14 @@ async function boot() {
   renderInitLoading("Loading settings...");
   runtime.hintsVisible = localStorage.getItem(HINTS_VISIBILITY_KEY) !== "false";
   runtime.foundWordsVisible = localStorage.getItem(FOUND_WORDS_VISIBILITY_KEY) !== "false";
+  runtime.wasMobileViewport = isMobileViewport();
   renderHintsVisibility();
   renderFoundWordsVisibility();
 
   renderInitLoading("Loading puzzle definitions...");
   runtime.puzzles = await loadPuzzles();
+  renderInitLoading("Refreshing saved sessions...");
+  await invalidateLegacySessionsOnce();
   renderInitLoading("Loading saved sessions...");
   runtime.sessionsCache = await loadSessions();
 
@@ -540,13 +567,18 @@ async function boot() {
 }
 
 window.addEventListener("resize", () => {
-  if (!isMobileViewport() && runtime.mobileSessionsOpen) {
-    setMobileSessionsOpen(false);
+  const isMobile = isMobileViewport();
+  const switchedToDesktop = runtime.wasMobileViewport && !isMobile;
+
+  if (switchedToDesktop && runtime.sessionsOpen) {
+    setSessionsOpen(false);
   }
 
-  if (!isMobileViewport() && runtime.mobileSeedControlsOpen) {
+  if (switchedToDesktop && runtime.mobileSeedControlsOpen) {
     setMobileSeedControlsOpen(false);
   }
+
+  runtime.wasMobileViewport = isMobile;
 });
 
 elements.wordForm.addEventListener("submit", async (event) => {
@@ -614,17 +646,17 @@ elements.goToTodayButton.addEventListener("click", async () => {
     const hydrated = hydrateStateFromSession(existingTodaySession);
     if (hydrated) {
       await activateState(hydrated, { persist: false });
-      setMobileSessionsOpen(false);
+      setSessionsOpen(false);
       return;
     }
   }
 
   await startDailySession();
-  setMobileSessionsOpen(false);
+  setSessionsOpen(false);
 });
 
 elements.openSessionsButton.addEventListener("click", () => {
-  setMobileSessionsOpen(true);
+  setSessionsOpen(true);
 });
 
 elements.toggleSeedControlsButton.addEventListener("click", () => {
@@ -632,11 +664,11 @@ elements.toggleSeedControlsButton.addEventListener("click", () => {
 });
 
 elements.closeSessionsButton.addEventListener("click", () => {
-  setMobileSessionsOpen(false);
+  setSessionsOpen(false);
 });
 
 elements.sessionsBackdrop.addEventListener("click", () => {
-  setMobileSessionsOpen(false);
+  setSessionsOpen(false);
 });
 
 elements.deleteLetterButton.addEventListener("click", () => {
@@ -701,7 +733,7 @@ elements.sessions.addEventListener("click", async (event) => {
   }
 
   await activateState(hydrated, { persist: false });
-  setMobileSessionsOpen(false);
+  setSessionsOpen(false);
 });
 
 document.addEventListener("keydown", (event) => {
@@ -727,9 +759,9 @@ document.addEventListener("keydown", (event) => {
     return;
   }
 
-  if (event.key === "Escape" && runtime.mobileSessionsOpen) {
+  if (event.key === "Escape" && runtime.sessionsOpen) {
     event.preventDefault();
-    setMobileSessionsOpen(false);
+    setSessionsOpen(false);
   }
 });
 

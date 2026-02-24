@@ -87,6 +87,20 @@ class FakeStoreTransactionView {
 
     return request;
   }
+
+  clear() {
+    const request = createRequest();
+    this.transaction._registerRequest();
+
+    queueMicrotask(() => {
+      this.internalStore.records.clear();
+      request.result = undefined;
+      emitSuccess(request);
+      this.transaction._requestFinished();
+    });
+
+    return request;
+  }
 }
 
 class FakeTransaction {

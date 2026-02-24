@@ -307,11 +307,15 @@ button:active {
   padding: 1rem;
 }
 
+.left-panel {
+  background: transparent;
+}
+
 .board-stack {
   display: flex;
   flex-direction: column;
   align-items: center;
-  max-width: 520px;
+  max-width: 360px;
   margin: 0 auto;
 }
 
@@ -376,6 +380,17 @@ input::placeholder {
   margin-top: 0.55rem;
   flex-wrap: wrap;
   justify-content: center;
+}
+
+letter-board {
+  width: min(100%, 560px);
+}
+
+@media (min-width: 901px) {
+  .board-actions button {
+    padding: 0.68rem 1.2rem;
+    font-size: 1.02rem;
+  }
 }
 
 .feedback {
@@ -493,7 +508,30 @@ input::placeholder {
 
 .open-sessions-button,
 .close-sessions-button {
+  display: inline-flex;
+}
+
+.session-panel {
   display: none;
+}
+
+.session-panel.is-open {
+  position: fixed;
+  inset: clamp(0.85rem, 3vw, 1.25rem);
+  z-index: 30;
+  display: block;
+  margin-top: 0;
+  padding: 0.9rem;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  overflow: auto;
+  box-shadow: 0 8px 28px color-mix(in srgb, #000000 35%, transparent 65%);
+}
+
+.session-panel.is-open #sessions {
+  max-height: min(55dvh, 520px);
+  overflow: auto;
 }
 
 #hints-content[hidden] {
@@ -640,11 +678,6 @@ td {
     min-width: 2.9rem;
   }
 
-  .open-sessions-button,
-  .close-sessions-button {
-    display: inline-flex;
-  }
-
   button {
     min-height: 44px;
     min-width: 44px;
@@ -661,33 +694,6 @@ td {
     border-radius: 999px;
     background: color-mix(in srgb, var(--panel) 88%, transparent 12%);
     backdrop-filter: blur(4px);
-  }
-
-  .session-panel {
-    display: none;
-  }
-
-  .session-panel.is-open-mobile {
-    position: fixed;
-    inset:
-      max(0.85rem, env(safe-area-inset-top))
-      max(0.85rem, env(safe-area-inset-right))
-      max(0.85rem, env(safe-area-inset-bottom))
-      max(0.85rem, env(safe-area-inset-left));
-    z-index: 30;
-    display: block;
-    margin-top: 0;
-    padding: 0.9rem;
-    border-radius: 12px;
-    border: 1px solid var(--border);
-    background: var(--panel);
-    overflow: auto;
-    box-shadow: 0 8px 28px color-mix(in srgb, #000000 35%, transparent 65%);
-  }
-
-  .session-panel.is-open-mobile #sessions {
-    max-height: min(55dvh, 520px);
-    overflow: auto;
   }
 
   #sessions li {
@@ -716,6 +722,10 @@ td {
 @media (max-width: 560px) {
   .board-stack {
     max-width: 380px;
+  }
+
+  letter-board {
+    width: min(100%, 380px);
   }
 
   .status-panel {
